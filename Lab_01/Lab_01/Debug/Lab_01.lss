@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.8  C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_01\Lab_01\main.asm Sun Feb 08 21:03:33 2026
+AVRASM ver. 2.2.8  C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_01\Lab_01\main.asm Tue Feb 10 01:57:33 2026
 
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc'
 C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_01\Lab_01\main.asm(6): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
@@ -1036,86 +1036,242 @@ C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_01\Lab
                                  
                                  ; ***** END OF FILE ******************************************************
                                  
+                                 // ******************************************************************************************************************************************************************************
                                  .org 0x00 // O ".org SRAM_START"
-000000 c000                      		RJMP start
+000000 c000                        		RJMP start
                                  	
                                  	start:
-                                 		// Configuración de "la pila"
+                                 	// Configuración de "la pila"
 000001 ef0f                      		LDI R16, LOW(RAMEND) // LDI R16, 0xFF
 000002 bf0d                      		OUT SPL, R16 // Stack pointer low
 000003 e008                      		LDI R16, HIGH(RAMEND) // LDI R16 0x08
 000004 bf0e                      		OUT SPH, R16 // Ahora este tiene 0x08FF
                                  
-                                 	// Configuración de LEDs
-000005 e00f                      		LDI R16, 0x0F
-000006 b904                      		OUT DDRB, R16 // Bits menos significativos del PORTB como output
-000007 2700                      		CLR R16
-000008 b905                      		OUT PORTB, R16 // Contador empieza en 0x00
+                                 	// Configuración del oscilador a 1MHz
+000005 e800                      		LDI R16, (1<<CLKPCE) // Carga 0x80 (1000_0000)
+000006 9300 0061                 		STS CLKPR, R16 // Enable del prescaler
+000008 e004                      		LDI R16, (1<<CLKPS2) // Set del CLKPS2 (0000_0100), que divide entre 16
+000009 9300 0061                 		STS CLKPR, R16
                                  
-                                 	// Configuración de botones
-000009 2700                      		CLR R16
-00000a b90a                      		OUT DDRD, R16 // Todo el PORTD como input
-00000b e00c                      		LDI R16, 0x0C
-00000c b90b                      		OUT PORTD, R16 // PORTD2 y PORTD3 con resistencia pull-up interna
+                                 	// DESHABILITAR ADC (Si no, no se puede usar PORTC como pines digitales)
+00000b 9100 007a                 		lds r16, ADCSRA
+00000d 770f                      		cbr r16, (1 << ADEN)
+00000e 9300 007a                 		sts ADCSRA, r16
+                                 
+                                 	// Deshabilitar UART (Para usar PD0 y PD1, que son Tx y Rx) (Usé PD1 como botón sumador)
+000010 e000                      		LDI R16, 0x00
+000011 9300 00c1                 		STS UCSR0B, R16
+                                 
+                                 	// Puertos I/O
+000013 e10f                      		LDI R16, 0x1F
+000014 b904                      		OUT DDRB, R16 // PORTB: PB[4-0] como OUTPUT, PB[7-5] como INPUT
+000015 ef00                      		LDI R16, 0xF0
+000016 b90a                      		OUT DDRD, R16 // Bits más significativos del PORTD como OUTPUT, menos significativos como INPUT
+000017 e30c                      		LDI R16, 0b0011_1100
+000018 b907                      		OUT DDRC, R16 // PORTC: PC[5-2] como output, el resto como INPUT
+                                 
+                                 	// Configuración de LEDs y botones
+                                 		// Amarillo
+000019 e000                      		LDI R16, 0b0000_0000
+00001a b905                      		OUT PORTB, R16 // Contador empieza en 0x00
+                                 		// Azul
+00001b e00e                      		LDI R16, 0b0000_1110 
+00001c b90b                      		OUT PORTD, R16 // Nibble más significativo (contador) en 0, bits 1, 2 y 3 con resistencia Pull-up
+                                 		// Naranja
+00001d e003                      		LDI R16, 0b0000_0011 
+00001e b908                      		OUT PORTC, R16 // Bits 0 y 1 con resistencia Pull-up, display del sumador (naranja) apagado
                                  
                                  	// Registros a utilizar
-00000d e010                      		LDI R17, 0x00 // Este es el registro que almacena el valor actual del contador
-00000e e020                      		LDI R18, 0X00 // Para confirmar el incremento del contador
-00000f e030                      		LDI R19, 0X00 // Para confirmar el decremento del contador
-000010 e040                      		LDI R20, 0x00 // Aquí se leerán las pulsaciones de los botones
+00001f e010                      		LDI R17, 0x00 // Este es el registro que almacena el valor actual del contador amarillo
+000020 e020                      		LDI R18, 0x00 // Para confirmar el incremento del contador amarillo
+000021 e030                      		LDI R19, 0x00 // Para confirmar el decremento del contador amarillo
+000022 e040                      		LDI R20, 0x00 // Aquí se leerán las pulsaciones de los botones
+000023 e050                      		LDI R21, 0x00 // Este es el registro que almacena el valor actual del contador azul
+000024 e060                      		LDI R22, 0x00 // Para confirmar el incremento del contador azul
+000025 e070                      		LDI R23, 0x00 // Para confirmar el decremento del contador azul
+000026 e080                      		LDI R24, 0x00 // Este es el registro que almacena el valor actual del sumador (naranja)
+000027 e090                      		LDI R25, 0x00 // Para confirmar la pulsación del botón de suma
+                                 
+                                 		//LDI R16, 0b0011_1111
+                                 		//OUT PORTC, R16
+                                 
+                                 		//LDI R16, 0b0011_0000
+                                 		//OUT PORTB, R16
                                  
                                  	Lectura:
-000011 b149                      		IN R20, PIND // Lectura de los botones
-000012 704c                      		ANDI R20, 0x0C // Para aislar solo los bits de los botones
-000013 3048                      		CPI R20, 0x08 // Botón + presionado
-000014 f029                      		BREQ Antirrebote_mas
-000015 3044                      		CPI R20, 0x04 // Botón - presionado
-000016 f061                      		BREQ Antirrebote_menos
-000017 e020                      		LDI R18, 0X00 // Reinicio del contador del incremento
-000018 e030                      		LDI R19, 0X00 // Reinicio del contador de decremento
-000019 cff7                      		RJMP Lectura
+000028 b149                      		IN R20, PIND // Lectura de los botones (Amarillo)
+000029 704c                      		ANDI R20, 0x0C // Para aislar solo los bits de los botones
+00002a 3048                      		CPI R20, 0x08 // Botón + presionado
+00002b f079                      		BREQ Antirrebote_mas_Y
+00002c 3044                      		CPI R20, 0x04 // Botón - presionado
+00002d f0b1                      		BREQ Antirrebote_menos_Y
                                  
-                                 	Antirrebote_mas:
-00001a b149                      		IN R20, PIND // Verificamos que el botón siga presionado
-00001b 704c                      		ANDI R20, 0x0C
-00001c 3048                      		CPI R20, 0x08
-00001d f799                      		BRNE Lectura
+00002e b146                      		IN R20, PINC // Lectura de los botones (Azul)
+00002f 7043                      		ANDI R20, 0x03 // Para aislar solo los bits de los botones
+000030 3041                      		CPI R20, 0x01 // Botón + presionado
+000031 f179                      		BREQ Antirrebote_mas_B
+000032 3042                      		CPI R20, 0x02 // Botón - presionado
+000033 f1b1                      		BREQ Antirrebote_menos_B
                                  
-00001e 9523                      		INC R18
-00001f 3f2a                      		CPI R18, 250 // Si se ha leído pulsación 250 veces seguidas, se acepta como válida
-000020 f059                      		BREQ Sumar
-000021 e030                      		LDI R19, 0X00 // Reinicio del contador de decremento
-000022 cfee                      		RJMP Lectura
+000034 e020                      		LDI R18, 0x00 // Reinicio del contador de incremento
+000035 e030                      		LDI R19, 0x00 // Reinicio del contador de decremento
                                  
-                                 	Antirrebote_menos:
-000023 b149                      		IN R20, PIND // Verificamos que el botón siga presionado
-000024 704c                      		ANDI R20, 0x0C
-000025 3044                      		CPI R20, 0x04
-000026 f751                      		BRNE Lectura
+000036 b149                      		IN R20, PIND // Lectura del botón de suma
+000037 7042                      		ANDI R20, 0x02 // Para aislar solo el botón de suma
+000038 3040                      		CPI R20, 0x00 // Botón de suma presionado
+000039 f771                      		BRNE Lectura
+00003a c04d                      		RJMP Antirrebote_suma
                                  
-000027 9533                      		INC R19
-000028 3f3a                      		CPI R19, 250 // Si se ha leído pulsación 250 veces seguidas, se acepta como válida
-000029 f031                      		BREQ Restar
-00002a e020                      		LDI R18, 0X00 // Reinicio del contador del incremento
-00002b cfe5                      		RJMP Lectura
+                                 // ******************************************************************************************************************************************************************************
+                                 // Primer contador (Amarillo)
                                  
-                                 	Sumar:
-00002c 9513                      		INC R17
-00002d e020                      		LDI R18, 0X00 // Reinicio del contador del incremento
-00002e 940c 0034                 		JMP Display_Contador
+                                 	Antirrebote_mas_Y:
+00003b b149                      		IN R20, PIND // Verificamos que el botón siga presionado
+00003c 704c                      		ANDI R20, 0x0C
+00003d 3048                      		CPI R20, 0x08
+00003e f749                      		BRNE Lectura
                                  
-                                 	Restar:
-000030 951a                      		DEC R17
-000031 e030                      		LDI R19, 0X00 // Reinicio del contador del decremento
-000032 940c 0034                 		JMP Display_Contador
+00003f 9523                      		INC R18
+000040 3f2a                      		CPI R18, 250 // Si se ha leído pulsación 250 veces seguidas, se acepta como válida
+000041 f059                      		BREQ Sumar_Y
+000042 e030                      		LDI R19, 0X00 // Reinicio del contador de decremento
+000043 cfe4                      		RJMP Lectura
                                  
-                                 	Display_Contador:
-000034 b149                      		IN R20, PIND // Vamos a confirmar que el botón ya no esté presionado
-000035 704c                      		ANDI R20, 0x0C // Aislamos los 2 bits de botones
-000036 304c                      		CPI R20, 0x0C
-000037 f7e1                      		BRNE Display_Contador // Si alguno de los botones sigue presionado, esperamos a que se libere
+                                 	Antirrebote_menos_Y:
+000044 b149                      		IN R20, PIND // Verificamos que el botón siga presionado
+000045 704c                      		ANDI R20, 0x0C
+000046 3044                      		CPI R20, 0x04
+000047 f701                      		BRNE Lectura
                                  
-000038 b915                      		OUT PORTB, R17
+000048 9533                      		INC R19
+000049 3f3a                      		CPI R19, 250 // Si se ha leído pulsación 250 veces seguidas, se acepta como válida
+00004a f031                      		BREQ Restar_Y
+00004b e020                      		LDI R18, 0X00 // Reinicio del contador del incremento
+00004c cfdb                      		RJMP Lectura
+                                 
+                                 	Sumar_Y:
+00004d 9513                      		INC R17
+00004e e020                      		LDI R18, 0X00 // Reinicio del contador del incremento
+00004f 940c 0055                 		JMP Display_Contador_Y
+                                 
+                                 	Restar_Y:
+000051 951a                      		DEC R17
+000052 e030                      		LDI R19, 0X00 // Reinicio del contador del decremento
+000053 940c 0055                 		JMP Display_Contador_Y
+                                 
+                                 	Display_Contador_Y:
+000055 b149                      		IN R20, PIND // Vamos a confirmar que el botón ya no esté presionado
+000056 704c                      		ANDI R20, 0x0C // Aislamos los 2 bits de botones
+000057 304c                      		CPI R20, 0x0C
+000058 f7e1                      		BRNE Display_Contador_Y // Si alguno de los botones sigue presionado, esperamos a que se libere
+                                 
+000059 e090                      		LDI R25, 0x00 // Reinicio del contador de la suma
+00005a b145                      		IN  R20, PORTB
+00005b 7340                      		ANDI R20, 0b0011_0000 // Preservar PB5 (pull-up), PB4 (LED verde del overflow)
+00005c 2b41                      		OR  R20, R17 // Insertar el valor del contador amarillo en PB3–PB0
+00005d b945                      		OUT PORTB, R20
+00005e 982c                      		CBI PORTB, 4
+00005f 940c 0028                 		JMP Lectura
+                                 
+                                 // ******************************************************************************************************************************************************************************
+                                 // Segundo contador (Azul)
+                                 
+                                 	Antirrebote_mas_B:
+000061 b146                      		IN R20, PINC // Verificamos que el botón siga presionado
+000062 7043                      		ANDI R20, 0x03
+000063 3041                      		CPI R20, 0x01
+000064 f619                      		BRNE Lectura
+                                 
+000065 9563                      		INC R22
+000066 3f6a                      		CPI R22, 250 // Si se ha leído pulsación 250 veces seguidas, se acepta como válida
+000067 f059                      		BREQ Sumar_B
+000068 e070                      		LDI R23, 0X00 // Reinicio del contador de decremento
+000069 cfbe                      		RJMP Lectura
+                                 
+                                 	Antirrebote_menos_B:
+00006a b146                      		IN R20, PINC // Verificamos que el botón siga presionado
+00006b 7042                      		ANDI R20, 0x02
+00006c ff41                      		SBRS R20, 0x01 // Skip si el botón está presionado
+00006d cfba                      		RJMP Lectura
+                                 
+00006e 9573                      		INC R23
+00006f 3f7a                      		CPI R23, 250 // Si se ha leído pulsación 250 veces seguidas, se acepta como válida
+000070 f031                      		BREQ Restar_B
+000071 e060                      		LDI R22, 0X00 // Reinicio del contador del incremento
+000072 cfb5                      		RJMP Lectura
+                                 
+                                 	Sumar_B:
+000073 9553                      		INC R21
+000074 e060                      		LDI R22, 0X00 // Reinicio del contador del incremento
+000075 940c 007b                 		JMP Display_Contador_B
+                                 
+                                 	Restar_B:
+000077 955a                      		DEC R21
+000078 e070                      		LDI R23, 0X00 // Reinicio del contador del decremento
+000079 940c 007b                 		JMP Display_Contador_B
+                                 
+                                 	Display_Contador_B: 
+00007b b146                      		IN R20, PINC // Vamos a confirmar que el botón ya no esté presionado 
+00007c 7043                      		ANDI R20, 0x03 // Aislamos los 2 bits de botones 
+00007d 3043                      		CPI R20, 0x03
+00007e f7e1                      		BRNE Display_Contador_B // Si alguno de los botones sigue presionado, esperamos a que se libere
+                                 
+00007f 2f45                      		MOV R20, R21 // Movemos el valor actual de contador a R20
+000080 704f                      		ANDI R20, 0x0F // Máscara para que solo los bits 0-3 tengan valor 
+000081 9542                      		SWAP R20 // Pasamos al nibble alto (bits 4–7, donde están las LEDs) 
+000082 604e                      		ORI R20, 0x0E // Devolvemos el pull-up en PD1, PD2 y PD3 
+000083 b94b                      		OUT PORTD, R20 // Mostramos el valor 
+000084 e090                      		LDI R25, 0x00 // Reinicio del contador de la suma
+000085 982c                      		CBI PORTB, 4
+000086 940c 0028                 		JMP Lectura
+                                 
+                                 // ******************************************************************************************************************************************************************************
+                                 // Suma de contadores (Naranja)
+                                 
+                                 	Antirrebote_suma:
+000088 b149                      		IN R20, PIND       // Verificamos que el botón siga presionado
+000089 7042                      		ANDI R20, 0x02 
+00008a 3040                      		CPI R20, 0x00      // Botón presionado cuando PB5 es 0
+00008b f421                      		BRNE Regreso       // Si no está presionado, regresar
+                                 
+00008c 9593                      		INC R25
+00008d 3f9a                      		CPI R25, 250       // Si se ha leído pulsación 250 veces seguidas, se acepta como válida
+00008e f011                      		BREQ Sumador_C
+00008f cf98                      		RJMP Lectura
+                                 
+                                 	Regreso:
+000090 cf97                      		RJMP Lectura
+                                 
+                                 	Sumador_C:
+000091 b149                      		IN R20, PIND       // Confirmamos que el botón ya no esté presionado 
+000092 7042                      		ANDI R20, 0x02
+000093 3040                      		CPI R20, 0x00      // Botón presionado = 0x00
+000094 f3e1                      		BREQ Sumador_C     // Mientras siga presionado, esperar	
+                                 
+000095 701f                      		ANDI R17, 0b0000_1111 // Aseguramos que el valor amarillo no es mayor a 4 bits
+000096 705f                      		ANDI R21, 0b0000_1111 // Aseguramos que el valor azul no es mayor a 4 bits
+                                 
+000097 2f81                      		MOV R24, R17 // Copiamos el valor actual del contador amarillo
+000098 0f85                      		ADD R24, R21 // Realizamos la suma entre ambos valores
+                                 
+000099 2744                      		CLR R20
+00009a 2f48                      		MOV R20, R24 // Copiamos el resultado de la suma
+00009b 7f40                      		ANDI R20, 0xF0 // Aislamos el nibble más significativo para verificar si algún bit se encendió al sumar
+00009c 3040                      		CPI R20, 0x00 // Si alguno se encendió, el resultado no es 0
+00009d f021                      		BREQ Mostrar_suma
+                                 
+00009e 2f41                      		MOV R20, R17 // Copiamos el valor actual de las LED amarillas, para no modificar las luces
+00009f 6340                      		ORI R20, 0b0011_0000 // Como hubo overflow, encendemos LED de overflow en PB4 (manteniendo pull-up en PB5)
+0000a0 b945                      		OUT PORTB, R20
+0000a1 c000                      		RJMP Mostrar_suma
+                                 
+                                 	Mostrar_suma:
+0000a2 708f                      		ANDI R24, 0x0F // Nos quedamos solo con los 4 bits menos significativos
+0000a3 0f88                      		LSL R24
+0000a4 0f88                      		LSL R24 // Corremos el valor de la suma a 00XX_XX00, para que coincida con las LEDs
+0000a5 6083                      		ORI R24, 0x03 // Para devolver resistencia Pull-up a los botones de PC0 y PC1
+0000a6 b988                      		OUT PORTC, R24 // Se encienden las luces correspondientes a la suma
+0000a7 e090                      		LDI R25, 0x00 // Reinicio del contador de la suma
 
 
 RESOURCE USE INFORMATION
@@ -1135,37 +1291,37 @@ counted separately from r26..r31 here.
 "ATmega328P" register use summary:
 x  :   0 y  :   0 z  :   0 r0 :   0 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
 r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 
-r13:   0 r14:   0 r15:   0 r16:  12 r17:   4 r18:   6 r19:   6 r20:  14 
-r21:   0 r22:   0 r23:   0 r24:   0 r25:   0 r26:   0 r27:   0 r28:   0 
+r13:   0 r14:   0 r15:   0 r16:  25 r17:   7 r18:   6 r19:   6 r20:  52 
+r21:   6 r22:   5 r23:   5 r24:   9 r25:   6 r26:   0 r27:   0 r28:   0 
 r29:   0 r30:   0 r31:   0 
-Registers used: 5 out of 35 (14.3%)
+Registers used: 10 out of 35 (28.6%)
 
 "ATmega328P" instruction use summary:
-.lds  :   0 .sts  :   0 adc   :   0 add   :   0 adiw  :   0 and   :   0 
-andi  :   4 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
-brcc  :   0 brcs  :   0 break :   0 breq  :   4 brge  :   0 brhc  :   0 
+.lds  :   0 .sts  :   0 adc   :   0 add   :   1 adiw  :   0 and   :   0 
+andi  :  17 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
+brcc  :   0 brcs  :   0 break :   0 breq  :  11 brge  :   0 brhc  :   0 
 brhs  :   0 brid  :   0 brie  :   0 brlo  :   0 brlt  :   0 brmi  :   0 
-brne  :   3 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
-brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   0 cbr   :   0 
-clc   :   0 clh   :   0 cli   :   0 cln   :   0 clr   :   2 cls   :   0 
+brne  :   7 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
+brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   2 cbr   :   1 
+clc   :   0 clh   :   0 cli   :   0 cln   :   0 clr   :   1 cls   :   0 
 clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   0 cpc   :   0 
-cpi   :   7 cpse  :   0 dec   :   1 eor   :   0 fmul  :   0 fmuls :   0 
-fmulsu:   0 icall :   0 ijmp  :   0 in    :   4 inc   :   3 jmp   :   3 
-ld    :   0 ldd   :   0 ldi   :  14 lds   :   0 lpm   :   0 lsl   :   0 
-lsr   :   0 mov   :   0 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
-neg   :   0 nop   :   0 or    :   0 ori   :   0 out   :   7 pop   :   0 
-push  :   0 rcall :   0 ret   :   0 reti  :   0 rjmp  :   4 rol   :   0 
+cpi   :  18 cpse  :   0 dec   :   2 eor   :   0 fmul  :   0 fmuls :   0 
+fmulsu:   0 icall :   0 ijmp  :   0 in    :  12 inc   :   7 jmp   :   6 
+ld    :   0 ldd   :   0 ldi   :  33 lds   :   1 lpm   :   0 lsl   :   2 
+lsr   :   0 mov   :   4 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
+neg   :   0 nop   :   0 or    :   1 ori   :   3 out   :  12 pop   :   0 
+push  :   0 rcall :   0 ret   :   0 reti  :   0 rjmp  :  11 rol   :   0 
 ror   :   0 sbc   :   0 sbci  :   0 sbi   :   0 sbic  :   0 sbis  :   0 
-sbiw  :   0 sbr   :   0 sbrc  :   0 sbrs  :   0 sec   :   0 seh   :   0 
+sbiw  :   0 sbr   :   0 sbrc  :   0 sbrs  :   1 sec   :   0 seh   :   0 
 sei   :   0 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
-sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 sts   :   0 
-sub   :   0 subi  :   0 swap  :   0 tst   :   0 wdr   :   0 
-Instructions used: 12 out of 113 (10.6%)
+sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 sts   :   4 
+sub   :   0 subi  :   0 swap  :   1 tst   :   0 wdr   :   0 
+Instructions used: 23 out of 113 (20.4%)
 
 "ATmega328P" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x000076    118      0    118   32768   0.4%
+[.cseg] 0x000000 0x000152    338      0    338   32768   1.0%
 [.dseg] 0x000100 0x000100      0      0      0    2048   0.0%
 [.eseg] 0x000000 0x000000      0      0      0    1024   0.0%
 

@@ -23,12 +23,21 @@
   <FILE>Lab_01.lss</FILE>
  </OUTPUT_FILES>
  <LABELS>
-  <start><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_01\Lab_01\main.asm</FILE><LINE>11</LINE></start>
-  <Lectura><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_01\Lab_01\main.asm</FILE><LINE>36</LINE></Lectura>
-  <Antirrebote_mas><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_01\Lab_01\main.asm</FILE><LINE>47</LINE></Antirrebote_mas>
-  <Antirrebote_menos><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_01\Lab_01\main.asm</FILE><LINE>59</LINE></Antirrebote_menos>
-  <Sumar><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_01\Lab_01\main.asm</FILE><LINE>71</LINE></Sumar>
-  <Restar><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_01\Lab_01\main.asm</FILE><LINE>76</LINE></Restar>
-  <Display_Contador><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_01\Lab_01\main.asm</FILE><LINE>81</LINE></Display_Contador>
+  <start><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_01\Lab_01\main.asm</FILE><LINE>12</LINE></start>
+  <Lectura><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_01\Lab_01\main.asm</FILE><LINE>70</LINE></Lectura>
+  <Antirrebote_mas_Y><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_01\Lab_01\main.asm</FILE><LINE>97</LINE></Antirrebote_mas_Y>
+  <Antirrebote_menos_Y><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_01\Lab_01\main.asm</FILE><LINE>109</LINE></Antirrebote_menos_Y>
+  <Antirrebote_mas_B><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_01\Lab_01\main.asm</FILE><LINE>148</LINE></Antirrebote_mas_B>
+  <Antirrebote_menos_B><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_01\Lab_01\main.asm</FILE><LINE>160</LINE></Antirrebote_menos_B>
+  <Antirrebote_suma><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_01\Lab_01\main.asm</FILE><LINE>200</LINE></Antirrebote_suma>
+  <Sumar_Y><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_01\Lab_01\main.asm</FILE><LINE>121</LINE></Sumar_Y>
+  <Restar_Y><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_01\Lab_01\main.asm</FILE><LINE>126</LINE></Restar_Y>
+  <Display_Contador_Y><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_01\Lab_01\main.asm</FILE><LINE>131</LINE></Display_Contador_Y>
+  <Sumar_B><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_01\Lab_01\main.asm</FILE><LINE>172</LINE></Sumar_B>
+  <Restar_B><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_01\Lab_01\main.asm</FILE><LINE>177</LINE></Restar_B>
+  <Display_Contador_B><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_01\Lab_01\main.asm</FILE><LINE>182</LINE></Display_Contador_B>
+  <Regreso><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_01\Lab_01\main.asm</FILE><LINE>211</LINE></Regreso>
+  <Sumador_C><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_01\Lab_01\main.asm</FILE><LINE>214</LINE></Sumador_C>
+  <Mostrar_suma><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_01\Lab_01\main.asm</FILE><LINE>237</LINE></Mostrar_suma>
  </LABELS>
 </ASSEMBLER_INFO>
