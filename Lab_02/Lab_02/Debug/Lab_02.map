@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.8  C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_02\Lab_02\main.asm Tue Feb 10 16:30:08 2026
+AVRASM ver. 2.2.8  C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_02\Lab_02\main.asm Thu Feb 12 16:33:48 2026
 
 
 EQU  SIGNATURE_000 0000001e
@@ -697,7 +697,10 @@ EQU  SPMRaddr     00000032
 EQU  INT_VECTORS_SIZE 00000034
 CSEG start        00000001
 CSEG Table_7seg   00000005
-CSEG Delay        00000030
-CSEG Incrementar  0000003e
-CSEG Antirrebote_display 00000042
-CSEG Contador_display 0000004a
+CSEG Delay        00000037
+CSEG Incrementar  0000004b
+CSEG Antirrebote_inc 00000052
+CSEG Antirrebote_dec 0000005f
+CSEG Overflow     0000006d
+CSEG Cambiar_display 0000006f
+CSEG Underflow    0000006b

@@ -1,6 +1,5 @@
 ; Programación de Microcontroladores
-; Lab 01
-; Created: 02/02/2026
+; Lab 02
 ; Caleb Portillo - 24419
 
 .include "M328PDEF.inc" // Nombres de registros específicos del ATmega328P
@@ -17,7 +16,7 @@
 		OUT SPH, R16 // Ahora este tiene 0x08FF
 
 	Table_7seg:
-		.db 0xFF, 0xA0, 0x37, 0x76, 0xAC, 0x9E, 0x9F, 0xB0, 0xBF, 0xBC, 0xBD, 0x8F 
+		.db 0xFB, 0xA0, 0x37, 0xB6, 0xAC, 0x9E, 0x9F, 0xB0, 0xBF, 0xBC, 0xBD, 0x8F, 0x1B, 0xA7, 0x1F, 0x1D
 
 	// Configuración del oscilador a 2MHz
 		LDI R16, (1<<CLKPCE) // Carga 0x80 (1000_0000)
@@ -25,7 +24,7 @@
 		LDI R16, 0x03 // Set del CLKPS2 (0000_0011), que divide entre 8
 		STS CLKPR, R16
 	
-	// Timer
+	// Timer para 100ms
 		LDI R16, (1<<CS02) | (1<<CS00)
 		OUT TCCR0B, R16
 		LDI R16, 61
@@ -41,11 +40,11 @@
 		STS UCSR0B, R16
 
 	// Puertos I/O
-		LDI R16, 0x0F// 4 LEDs amarillas como output
+		LDI R16, 0x1F// 4 LEDs amarillas como output y la alarma en PC4
 		OUT DDRC, R16
 		LDI R16, 0xFF // Todo el PORTC como OUTPUT para el display
 		OUT DDRD, R16
-		LDI R16, 0x00 // Todo el PORTC como INPUT para los botones
+		LDI R16, 0x00 // Todo el PORTB como INPUT para los botones
 		OUT DDRB, R16
 
 	// Configuración de LEDs y botones
@@ -61,59 +60,109 @@
 		LDI ZL, LOW(Table_7seg<<1)
 
 	// Registros a utilizar
-		LDI R17, 0x00 // Valor actual del contador
-		LDI R18, 0x00 // Contador de número de veces que se ha presionado el botón
-		LDI R19, 0x00 // Para el antirrebote del botón
-		LDI R20, 0x00 // Para leer la pulsación del botón
-		LDI R21, 0x00 // Para almacenar el valor actual de Z
+		LDI R17, 0x00 // Valor actual del contador (LEDs amarillas)
+		LDI R18, 0x00 // Valor actual del display de 7 segmentos
+		LDI R19, 0x00 // Para el antirrebote del botón +
+		LDI R20, 0x00 // Para el antirrebote del botón -
+		LDI R21, 0x00 // Para leer la pulsación de los botones
+		LDI R22, 0x00 // Para almacenar el valor actual de Z
+		LDI R23, 0x00 // Para activar la LED verde
+		LDI R24, 0x1F // Para reiniciar el contador si hay overflow
+		LDI R25, 0x00 // Para contar 1s entre cambios de LEDs amarillas
+
+		LPM R16, Z // Guardar el número actual (0 en el display)
+		OUT PORTD, R16 // Mostrar el número 0
 
 	Delay:
+		// Regresamos el valor de Z a 0 en el display
+		LDI ZH, HIGH(Table_7seg<<1)
+		LDI ZL, LOW(Table_7seg<<1)
+		
+		// Reiniciamos antirrebote de ambos botones
+		LDI R19, 0x00
+		LDI R20, 0x00
+
 		// Cambiar el número del contador
 		IN R16, TIFR0
 		SBRS R16, TOV0
 		RJMP Delay
-		SBI TIFR0, TOV0 // Borrar banera
+		SBI TIFR0, TOV0 // Borrar bandera
 		LDI R16, 61
 		OUT TCNT0, R16
 		RCALL Incrementar
 
-		// Leer el botón de suma cambia el display
-		IN R20, PINB
-		ANDI R20, 0x18 // Aislar Pin PB3 y 4
-		CPI R20, 0x08 // Si son iguales, el botón se presionó
-		BRNE Delay
-		RJMP Antirrebote_display
+		// Leemos la pulsación del botón +
+		IN R21, PINB
+		ANDI R21, 0x10 // Para aislar el botón +
+		CPI R21, 0x00 // Son iguales si se pulsó
+		BREQ Antirrebote_inc
 
+		// Leemos la pulsación del botón -
+		IN R21, PINB
+		ANDI R21, 0x08 // Para aislar el botón -
+		CPI R21, 0x00 // Son iguales si se pulsó
+		BREQ Antirrebote_dec
+
+		RJMP Delay
+	
 	Incrementar:
-		INC R17
-		ANDI R17, 0x0F
+		INC R17 // Incrementar contador binario
+		ANDI R17, 0x0F // Solo 4 bits con valor
+		CPSE R23, R1 // Skip si R23 es 0
+		ORI R17, 0x10 // Si R23 no es 0, encender LED verde
 		OUT PORTC, R17
+		CLR R1
 		RET
 
-	Antirrebote_display:
-		IN R20, PINB // Verificamos que el botón siga presionado
-		ANDI R20, 0x18
-		CPI R20, 0x08
+	Antirrebote_inc:
+		IN R21, PINB // Confirmamos que siga presionado
+		ANDI R21, 0x10 // Para aislar el botón +
+		CPI R21, 0x00 // Son iguales si se pulsó
 		BRNE Delay
 
-		INC R19
-		CPI R19, 250 // Si se ha leído pulsación 250 veces seguidas, se acepta como válida
-		BREQ Contador_display
+		INC R19 // Incrementamos el valor de antirrebote
+		CPI R19, 250 // Después de 10 ciclos, la pulsación es válida
+		BRNE Antirrebote_inc
+		
+		LDI R23, 0xFF
+		CPI R18, 0x0F
+		BREQ Overflow
+		INC R18
+
+		RCALL Cambiar_display
 		RJMP Delay
 
-	Contador_display:
-		IN R20, PINB // Verificamos que el botón se deje de pulsar
-		ANDI R20, 0x18
-		CPI R20, 0x08
-		BREQ Contador_display		
-
-		INC R18 // Incrementar el contador de número de veces que se ha presionado el botón
-		LPM R21, Z+ // Guardar el número actual, z pasa al siguiente
-		OUT PORTD, R21 // Mostrar el número
-		
-		ANDI R18, 0x0F
-		CPI R18, 0x00
+	Antirrebote_dec:
+		IN R21, PINB // Confirmamos que siga presionado
+		ANDI R21, 0x08 // Para aislar el botón -
+		CPI R21, 0x00 // Son iguales si se pulsó
 		BRNE Delay
-		LDI ZH, HIGH(Table_7seg<<1)
-		LDI ZL ,LOW(Table_7seg<<1)
+
+		INC R20 // Incrementamos el valor de antirrebote
+		CPI R20, 250 // Después de 10 ciclos, la pulsación es válida
+		BRNE Antirrebote_dec
+		
+		LDI R23, 0x00
+		CPI R18, 0x00
+		BREQ Underflow
+		DEC R18
+		RJMP Cambiar_display
+
+	Underflow:
+		LDI R18, 0x0F
+		RJMP Cambiar_display
+
+	Overflow:
+		LDI R18, 0x00
+		RJMP Cambiar_display
+
+	Cambiar_display:
+		IN R21, PINB // Confirmamos que no esté presionado ningún botón
+		ANDI R21, 0x18 // Para aislar ambos botones
+		CPI R21, 0x18 // Son iguales si ya no se pulsó
+		BRNE Cambiar_display	
+
+		ADD ZL, R18
+		LPM R16, Z // Guardar el número actual
+		OUT PORTD, R16 // Mostrar el número 0
 		RJMP Delay
