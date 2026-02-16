@@ -60,6 +60,7 @@
 		LDI ZL, LOW(Table_7seg<<1)
 
 	// Registros a utilizar
+		CLR R1 // Se usa en la máscara para no modificar el LED verde
 		LDI R17, 0x00 // Valor actual del contador (LEDs amarillas)
 		LDI R18, 0x00 // Valor actual del display de 7 segmentos
 		LDI R19, 0x00 // Para el antirrebote del botón +
@@ -67,8 +68,7 @@
 		LDI R21, 0x00 // Para leer la pulsación de los botones
 		LDI R22, 0x00 // Para almacenar el valor actual de Z
 		LDI R23, 0x00 // Para activar la LED verde
-		LDI R24, 0x1F // Para reiniciar el contador si hay overflow
-		LDI R25, 0x00 // Para contar 1s entre cambios de LEDs amarillas
+		LDI R24, 0x00 // Para contar 1s entre cambios de LEDs amarillas
 
 		LPM R16, Z // Guardar el número actual (0 en el display)
 		OUT PORTD, R16 // Mostrar el número 0
@@ -77,19 +77,6 @@
 		// Regresamos el valor de Z a 0 en el display
 		LDI ZH, HIGH(Table_7seg<<1)
 		LDI ZL, LOW(Table_7seg<<1)
-		
-		// Reiniciamos antirrebote de ambos botones
-		LDI R19, 0x00
-		LDI R20, 0x00
-
-		// Cambiar el número del contador
-		IN R16, TIFR0
-		SBRS R16, TOV0
-		RJMP Delay
-		SBI TIFR0, TOV0 // Borrar bandera
-		LDI R16, 61
-		OUT TCNT0, R16
-		RCALL Incrementar
 
 		// Leemos la pulsación del botón +
 		IN R21, PINB
@@ -103,15 +90,42 @@
 		CPI R21, 0x00 // Son iguales si se pulsó
 		BREQ Antirrebote_dec
 
+		// Reiniciamos antirrebote de ambos botones
+		LDI R19, 0x00
+		LDI R20, 0x00
+
+		// Cambiar el número del contador
+		IN R16, TIFR0
+		SBRS R16, TOV0 // Skip si no han pasado 100ms todavía
+		RJMP Delay
+		SBI TIFR0, TOV0 // Borrar bandera
+		LDI R16, 61 // Reconfigurar timer
+		OUT TCNT0, R16
+		INC R24 // Cada 10 ciclos, pasa 1 segundo
+		CPI R24, 10
+		BRNE Delay // Si no ha pasado 1s, regresar al bucle
+		RCALL Incrementar // Al pasar 1s, incrementar el contador
+
+		MOV R16, R17 // Para evitar que se haya errores en la comparación (porque el LED verde modifica el valor de R17)
+		ANDI R16, 0x0F // Comparamos solo el valor de las LEDs amarillas
+		CPSE R16, R18 // Skip si el contador y el display son iguales
+		RJMP Delay
+
+		LDI R17, 0x00 // Reiniciar contador
+		COM R23 // Invierte todos los bits del registro
+		CPSE R23, R1 // Skip si R23 es 0 para no encender el LED si estaba apagado
+		ORI R17, 0x10 // Si R23 no es 0, mantener encendido el LED verde
+		OUT PORTC, R17
 		RJMP Delay
 	
 	Incrementar:
 		INC R17 // Incrementar contador binario
 		ANDI R17, 0x0F // Solo 4 bits con valor
-		CPSE R23, R1 // Skip si R23 es 0
-		ORI R17, 0x10 // Si R23 no es 0, encender LED verde
+		CPSE R23, R1 // Skip si R23 es 0 para no encender el LED si estaba apagado
+		ORI R17, 0x10 // Si R23 no es 0, mantener encendido el LED verde
 		OUT PORTC, R17
 		CLR R1
+		CLR R24
 		RET
 
 	Antirrebote_inc:
@@ -124,7 +138,6 @@
 		CPI R19, 250 // Después de 10 ciclos, la pulsación es válida
 		BRNE Antirrebote_inc
 		
-		LDI R23, 0xFF
 		CPI R18, 0x0F
 		BREQ Overflow
 		INC R18
@@ -142,7 +155,6 @@
 		CPI R20, 250 // Después de 10 ciclos, la pulsación es válida
 		BRNE Antirrebote_dec
 		
-		LDI R23, 0x00
 		CPI R18, 0x00
 		BREQ Underflow
 		DEC R18

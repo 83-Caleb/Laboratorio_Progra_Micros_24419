@@ -25,12 +25,12 @@
  <LABELS>
   <start><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_02\Lab_02\main.asm</FILE><LINE>11</LINE></start>
   <Table_7seg><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_02\Lab_02\main.asm</FILE><LINE>18</LINE></Table_7seg>
-  <Delay><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_02\Lab_02\main.asm</FILE><LINE>75</LINE></Delay>
-  <Incrementar><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_02\Lab_02\main.asm</FILE><LINE>107</LINE></Incrementar>
-  <Antirrebote_inc><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_02\Lab_02\main.asm</FILE><LINE>116</LINE></Antirrebote_inc>
-  <Antirrebote_dec><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_02\Lab_02\main.asm</FILE><LINE>134</LINE></Antirrebote_dec>
-  <Overflow><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_02\Lab_02\main.asm</FILE><LINE>154</LINE></Overflow>
-  <Cambiar_display><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_02\Lab_02\main.asm</FILE><LINE>158</LINE></Cambiar_display>
-  <Underflow><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_02\Lab_02\main.asm</FILE><LINE>150</LINE></Underflow>
+  <Delay><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_02\Lab_02\main.asm</FILE><LINE>76</LINE></Delay>
+  <Antirrebote_inc><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_02\Lab_02\main.asm</FILE><LINE>131</LINE></Antirrebote_inc>
+  <Antirrebote_dec><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_02\Lab_02\main.asm</FILE><LINE>148</LINE></Antirrebote_dec>
+  <Incrementar><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_02\Lab_02\main.asm</FILE><LINE>121</LINE></Incrementar>
+  <Overflow><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_02\Lab_02\main.asm</FILE><LINE>167</LINE></Overflow>
+  <Cambiar_display><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_02\Lab_02\main.asm</FILE><LINE>171</LINE></Cambiar_display>
+  <Underflow><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_02\Lab_02\main.asm</FILE><LINE>163</LINE></Underflow>
  </LABELS>
 </ASSEMBLER_INFO>
