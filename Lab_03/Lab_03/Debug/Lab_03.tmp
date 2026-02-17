@@ -1,0 +1,37 @@
+<ASSEMBLER_INFO>
+ <VERSION>2.2.8</VERSION>
+ <DEVICE>"ATmega328P"</DEVICE>
+ <WORKING_DIR>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\Debug</WORKING_DIR>
+ <INCLUDE_PATH>
+  <DIR>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc</DIR>
+  <DIR>C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avrassembler\Include</DIR>
+  <DIR></DIR>
+ </INCLUDE_PATH>
+ <SOURCE_FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</SOURCE_FILE>
+ <INCLUDED_FILES>
+  <FILE>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc</FILE>
+  <FILE>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc</FILE>
+ </INCLUDED_FILES>
+ <OBJECT_FILES>
+  <FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\Debug\Lab_03.obj</FILE>
+ </OBJECT_FILES>
+ <HEX_FILES>
+  <FILE>Lab_03.hex</FILE>
+ </HEX_FILES>
+ <OUTPUT_FILES>
+  <FILE>Lab_03.map</FILE>
+  <FILE>Lab_03.lss</FILE>
+ </OUTPUT_FILES>
+ <LABELS>
+  <botones><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>8</LINE></botones>
+  <contador><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>9</LINE></contador>
+  <start><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>19</LINE></start>
+  <ISR_PCINT1><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>91</LINE></ISR_PCINT1>
+  <Table_7seg><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>158</LINE></Table_7seg>
+  <Main><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>85</LINE></Main>
+  <ISR_return><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>126</LINE></ISR_return>
+  <Boton_inc><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>137</LINE></Boton_inc>
+  <Boton_dec><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>142</LINE></Boton_dec>
+  <Mostrar_contador><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>147</LINE></Mostrar_contador>
+ </LABELS>
+</ASSEMBLER_INFO>
