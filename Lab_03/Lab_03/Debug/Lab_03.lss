@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.8  C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm Tue Feb 17 13:02:08 2026
+AVRASM ver. 2.2.8  C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm Tue Feb 17 23:15:43 2026
 
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc'
 C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm(5): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
@@ -1038,162 +1038,237 @@ C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab
                                  .dseg // Se guardará el estado previo de los botones en la SRAM
 000100                           botones: .byte 1
 000101                           contador: .byte 1
+000102                           L_ciclos: .byte 1
+000103                           unidades_7seg: .byte 1
                                  
                                  // *********************************************************************************************************************************************//
                                  .cseg
                                  .org 0x00 // O ".org SRAM_START"
-000000 c008                        		RJMP start
+000000 c020                        		RJMP start
                                  
                                  .org PCI1addr // Interrupción para pin change en PORTC
-000008 c031                      	RJMP ISR_PCINT1
+000008 c05f                      	RJMP ISR_PCINT1
+                                 
+                                 .org OVF0addr // Interrupción por timer
+000020 c07b                      	RJMP ISR_timer
                                  	
                                  	start:
-000009 94f8                      	CLI
+000021 94f8                      	CLI
                                  
                                  	// Configuración de "la pila"
-00000a ef0f                      		LDI R16, LOW(RAMEND) // LDI R16, 0xFF
-00000b bf0d                      		OUT SPL, R16 // Stack pointer low
-00000c e008                      		LDI R16, HIGH(RAMEND) // LDI R16 0x08
-00000d bf0e                      		OUT SPH, R16 // Ahora este tiene 0x08FF
+000022 ef0f                      		LDI R16, LOW(RAMEND) // LDI R16, 0xFF
+000023 bf0d                      		OUT SPL, R16 // Stack pointer low
+000024 e008                      		LDI R16, HIGH(RAMEND) // LDI R16 0x08
+000025 bf0e                      		OUT SPH, R16 // Ahora este tiene 0x08FF
+                                 
+                                 	// Configuración del oscilador a 2MHz
+000026 e800                      		LDI R16, (1<<CLKPCE) // Carga 0x80 (1000_0000)
+000027 9300 0061                 		STS CLKPR, R16 // Enable del prescaler
+000029 e003                      		LDI R16, 0x03 // Set del CLKPS2 (0000_0011), que divide entre 8
+00002a 9300 0061                 		STS CLKPR, R16
+                                 
+                                 	// Timer
+00002c e004                      		LDI R16, (1<<CS02) // CLK a 256
+00002d bd05                      		OUT TCCR0B, R16
+00002e e604                      		LDI R16, 100 // Empezamos a contar en 100
+00002f bd06                      		OUT TCNT0, R16
+000030 e001                      		LDI R16, (1<<TOIE0) // Enable de la interrupción Timer/Counter0
+000031 9300 006e                 		STS TIMSK0, R16
                                  		
                                  	// DESHABILITAR ADC (Si no, no se puede usar PORTC como pines digitales (Se les conectaron las LEDs del contador y los botones)
-00000e 9100 007a                 		lds r16, ADCSRA
-000010 770f                      		cbr r16, (1 << ADEN)
-000011 9300 007a                 		sts ADCSRA, r16
+000033 9100 007a                 		lds r16, ADCSRA
+000035 770f                      		cbr r16, (1 << ADEN)
+000036 9300 007a                 		sts ADCSRA, r16
                                  
                                  	// Deshabilitar UART (Para usar PD0 y PD1, que son Tx y Rx) (Se les conectaron pines del display)
-000013 e000                      		LDI R16, 0x00
-000014 9300 00c1                 		STS UCSR0B, R16
+000038 e000                      		LDI R16, 0x00
+000039 9300 00c1                 		STS UCSR0B, R16
                                  
                                  	// Puertos I/O
-000016 e006                      		LDI R16, 0x06 // PB2 es el enable del display der y PB1 el enable del display izq
-000017 b904                      		OUT DDRB, R16
-000018 e00f                      		LDI R16, 0x0F // En 4-5 están los botones y en 0-3 están las LEDs rojas del display
-000019 b907                      		OUT DDRC, R16
-00001a ef0f                      		LDI R16, 0xFF // Display de 7 segmentos, todo OUTPUT
-00001b b90a                      		OUT DDRD, R16
+00003b e006                      		LDI R16, 0x06 // PB2 es el enable del display der y PB1 el enable del display izq
+00003c b904                      		OUT DDRB, R16
+00003d e00f                      		LDI R16, 0x0F // En 4-5 están los botones y en 0-3 están las LEDs rojas del display
+00003e b907                      		OUT DDRC, R16
+00003f ef0f                      		LDI R16, 0xFF // Display de 7 segmentos, todo OUTPUT
+000040 b90a                      		OUT DDRD, R16
                                  
                                  	// Configuración de LEDs y botones
-00001c e006                      		LDI R16, 0x06 // Ambos displays enabled
-00001d b905                      		OUT PORTB, R16
-00001e e300                      		LDI R16, 0x30 // PUll-up en 4-5 y contador apagado
-00001f b908                      		OUT PORTC, R16
-000020 e000                      		LDI R16, 0x00 // Displays apagados
-000021 b90b                      		OUT PORTD, R16
+000041 e006                      		LDI R16, 0x06 // Ambos displays enabled
+000042 b905                      		OUT PORTB, R16
+000043 e300                      		LDI R16, 0x30 // PUll-up en 4-5 y contador apagado
+000044 b908                      		OUT PORTC, R16
+000045 e000                      		LDI R16, 0x00 // Displays apagados
+000046 b90b                      		OUT PORTD, R16
                                  
                                  	// Configuración de z
-000022 e0f0                      		LDI ZH, HIGH(Table_7seg<<1)
-000023 edec                      		LDI ZL, LOW(Table_7seg<<1)
+000047 e0f1                      		LDI ZH, HIGH(Table_7seg<<1)
+000048 e8e2                      		LDI ZL, LOW(Table_7seg<<1)
                                  
                                  	// Configurar interrupciones por pin change
-000024 e002                      		LDI R16, (1<<PCIE1) // Enable del PORTC
-000025 9300 0068                 		STS PCICR, R16
-000027 e300                      		LDI R16, (1<<PCINT12)|(1<<PCINT13) // Selección de los bits PC4 y PC5 para interrupciones
-000028 9300 006c                 		STS PCMSK1, R16
+000049 e002                      		LDI R16, (1<<PCIE1) // Enable del PORTC
+00004a 9300 0068                 		STS PCICR, R16
+00004c e300                      		LDI R16, (1<<PCINT12)|(1<<PCINT13) // Selección de los bits PC4 y PC5 para interrupciones
+00004d 9300 006c                 		STS PCMSK1, R16
                                  
                                  	// Registros a utilizar
-00002a 2700                      		CLR R16
-00002b e010                      		LDI R17, 0x00 // Para leer la pulsación de los botones
-00002c e020                      		LDI R18, 0x00 // Para guardar el estado actual del contador de 4 bits (LEDs rojas)
+00004f 2700                      		CLR R16
+000050 e010                      		LDI R17, 0x00 // Para leer la pulsación de los botones
+000051 e020                      		LDI R18, 0x00 // Para guardar el estado actual del contador de 4 bits (LEDs rojas)
                                  
-00002d e090                      		LDI R25, 0x00 // Lectura del botón PC4 (incremento)
-00002e e0a0                      		LDI R26, 0x00 // Lectura del botón PC5 (decremento)
+000052 e090                      		LDI R25, 0x00 // Lectura del botón PC4 (incremento)
+000053 e0a0                      		LDI R26, 0x00 // Lectura del botón PC5 (decremento)
                                  
-00002f e300                      		LDI R16, 0x30 // Estado inicial de los botones
-000030 9300 0100                 		STS botones, R16
+000054 e300                      		LDI R16, 0x30 // Estado inicial de los botones
+000055 9300 0100                 		STS botones, R16
                                  
-000032 e000                      		LDI R16, 0x00 // Estado inicial del contador
-000033 9300 0101                 		STS contador, R16
+000057 e000                      		LDI R16, 0x00 // Estado inicial del contador
+000058 9300 0101                 		STS contador, R16
                                  
-000035 9104                      		LPM R16, Z // Guardar el número actual (0 en el display)
-000036 b90b                      		OUT PORTD, R16 // Mostrar el número 0
+00005a 9104                      		LPM R16, Z // Guardar el número actual (0 en el display)
+00005b b90b                      		OUT PORTD, R16 // Mostrar el número 0
                                  
-000037 9478                      		SEI // Habilitar interrupciones
+00005c e000                      		LDI R16, 0x00
+00005d 9300 0101                 		STS contador, R16
+00005f e000                      		LDI R16, 0x00          ; <-- Esto falta
+000060 9300 0103                 		STS unidades_7seg, R16 ; <-- Agregar estas dos líneas
+000062 e000                      		LDI R16, 0x00
+000063 9300 0102                 		STS L_ciclos, R16      ; También considera inicializar L_ciclos por la misma razón
+                                 
+000065 9478                      		SEI // Habilitar interrupciones
                                  
                                  // *********************************************************************************************************************************************//
                                  // Código principal
                                  
                                      Main:
-000038 940c 0038                         JMP Main
+000066 940c 0066                         JMP Main
                                  
                                  // *********************************************************************************************************************************************//
                                  // Interrupciones
                                  
+                                 // Pin-Change
                                  	ISR_PCINT1:
-00003a 930f                      		PUSH R16
-00003b b70f                      		IN   R16, SREG
-00003c 930f                      		PUSH R16
-00003d 931f                      		PUSH R17
-00003e 932f                      		PUSH R18
-00003f 939f                      		PUSH R25
-000040 93af                      		PUSH R26
+000068 930f                      		PUSH R16
+000069 b70f                      		IN   R16, SREG
+00006a 930f                      		PUSH R16
+00006b 931f                      		PUSH R17
+00006c 932f                      		PUSH R18
+00006d 939f                      		PUSH R25
+00006e 93af                      		PUSH R26
                                  
                                  		// Lectura de los botones
-000041 b116                      		IN R17, PINC
-000042 7310                      		ANDI R17, 0x30
+00006f b116                      		IN R17, PINC
+000070 7310                      		ANDI R17, 0x30
                                  
                                  		// Verificamos botón de incremento
-000043 9100 0100                 		LDS R16, botones // Verificamos estado anterior de PC4
-000045 7100                      		ANDI R16, 0x10
-000046 3000                      		CPI R16, 0x00 // Si el estado anterior era 0, regresamos al programa principal
-000047 f069                      		BREQ ISR_return
+000071 9100 0100                 		LDS R16, botones // Verificamos estado anterior de PC4
+000073 7100                      		ANDI R16, 0x10
+000074 3000                      		CPI R16, 0x00 // Si el estado anterior era 0, regresamos al programa principal
+000075 f069                      		BREQ ISR_return
                                  		
-000048 2f91                      		MOV R25, R17 // Aislamos lectura actual PC4
-000049 7190                      		ANDI R25, 0x10
-00004a 3090                      		CPI R25, 0x00  // Si son iguales, el botón está presionado
-00004b f099                      		BREQ Boton_inc
+000076 2f91                      		MOV R25, R17 // Aislamos lectura actual PC4
+000077 7190                      		ANDI R25, 0x10
+000078 3090                      		CPI R25, 0x00  // Si son iguales, el botón está presionado
+000079 f099                      		BREQ Boton_inc
                                  
                                  		// Verificamos botón de decremento
-00004c 9100 0100                 		LDS R16, botones // Verificamos estado anterior de PC5
-00004e 7200                      		ANDI R16, 0x20
-00004f 3000                      		CPI R16, 0x00 // Si el estado anterior era 0, regresamos al programa principal
-000050 f021                      		BREQ ISR_return
+00007a 9100 0100                 		LDS R16, botones // Verificamos estado anterior de PC5
+00007c 7200                      		ANDI R16, 0x20
+00007d 3000                      		CPI R16, 0x00 // Si el estado anterior era 0, regresamos al programa principal
+00007e f021                      		BREQ ISR_return
                                  		
-000051 2fa1                      		MOV R26, R17 // Aislamos lectura actual PC5
-000052 72a0                      		ANDI R26, 0x20
-000053 30a0                      		CPI R26, 0x00  // Si son iguales, el botón está presionado
-000054 f071                      		BREQ Boton_dec
+00007f 2fa1                      		MOV R26, R17 // Aislamos lectura actual PC5
+000080 72a0                      		ANDI R26, 0x20
+000081 30a0                      		CPI R26, 0x00  // Si son iguales, el botón está presionado
+000082 f071                      		BREQ Boton_dec
                                  
                                  	ISR_return:
-000055 9310 0100                 		STS botones, R17 // Guardamos la lectura realizada como nuevo estado de los botones
-000057 91af                      		POP R26
-000058 919f                      		POP R25
-000059 912f                      		POP R18
-00005a 911f                      		POP R17
-00005b 910f                      		POP R16
-00005c bf0f                      		OUT  SREG, R16
-00005d 910f                      		POP  R16
-00005e 9518                      		RETI
+000083 9310 0100                 		STS botones, R17 // Guardamos la lectura realizada como nuevo estado de los botones
+000085 91af                      		POP R26
+000086 919f                      		POP R25
+000087 912f                      		POP R18
+000088 911f                      		POP R17
+000089 910f                      		POP R16
+00008a bf0f                      		OUT  SREG, R16
+00008b 910f                      		POP  R16
+00008c 9518                      		RETI
                                  
                                  	Boton_inc:
-00005f 9120 0101                 		LDS R18, contador
-000061 9523                      		INC R18
-000062 c004                      		RJMP Mostrar_contador
+00008d 9120 0101                 		LDS R18, contador
+00008f 9523                      		INC R18
+000090 c004                      		RJMP Mostrar_contador
                                  
                                  	Boton_dec:
-000063 9120 0101                 		LDS R18, contador
-000065 952a                      		DEC R18
-000066 c000                      		RJMP Mostrar_contador
+000091 9120 0101                 		LDS R18, contador
+000093 952a                      		DEC R18
+000094 c000                      		RJMP Mostrar_contador
                                  
                                  	Mostrar_contador:
-000067 702f                      		ANDI R18, 0x0F // Para tener valor solo en el nibble menor (LEDs)
-000068 9320 0101                 		STS contador, R18
-00006a 2f02                      		MOV R16, R18
-00006b 6300                      		ORI R16, 0x30 // Para devolver el pull-up a los botones en PC5-4
-00006c b908                      		OUT PORTC, R16		
-00006d cfe7                      		RJMP ISR_return
+000095 702f                      		ANDI R18, 0x0F // Para tener valor solo en el nibble menor (LEDs)
+000096 9320 0101                 		STS contador, R18
+000098 2f02                      		MOV R16, R18
+000099 6300                      		ORI R16, 0x30 // Para devolver el pull-up a los botones en PC5-4
+00009a b908                      		OUT PORTC, R16		
+00009b cfe7                      		RJMP ISR_return
                                  
+                                 // Por timer
+                                 	ISR_timer:
+00009c 930f                      		PUSH R16
+00009d b70f                      		IN   R16, SREG
+00009e 930f                      		PUSH R16
+00009f 931f                      		PUSH R17
+0000a0 932f                      		PUSH R18
+                                 
+0000a1 9110 0103                 		LDS R17, unidades_7seg
+0000a3 9100 0102                 		LDS R16, L_ciclos
+0000a5 9503                      		INC R16
+0000a6 3302                      		CPI R16, 50 // Son iguales si ya pasaron 50 ciclos de 20ms
+0000a7 f429                      		BRNE Regreso_ISR_timer
+0000a8 e000                      		LDI R16, 0x00 // Reiniciar el contador de ciclos
+                                 
+0000a9 9513                      		INC R17
+0000aa 3110                      		CPI R17, 0x10 // Si el display ya pasó de F, regresamos a 0
+0000ab f099                      		BREQ Overflow
+0000ac c00e                      		RJMP Display_unidades
+                                 
+                                 	Regreso_ISR_timer:
+                                 
+0000ad e624                      		LDI R18, 100 // Empezamos a contar en 100
+0000ae bd26                      		OUT TCNT0, R18
+                                 
+0000af e0f1                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
+0000b0 e8e2                      		LDI ZL, LOW(Table_7seg<<1)
+                                 
+0000b1 9300 0102                 		STS L_ciclos, R16 // Guardamos los nuevos valores del contador de ciclos y el display
+0000b3 9310 0103                 		STS unidades_7seg, R17
+0000b5 912f                      		POP R18
+0000b6 911f                      		POP R17
+0000b7 910f                      		POP R16
+0000b8 bf0f                      		OUT  SREG, R16
+0000b9 910f                      		POP  R16
+0000ba 9518                      		RETI
+                                 
+                                 	Display_unidades:
+                                 
+0000bb 0fe1                      		ADD ZL, R17
+0000bc 9124                      		LPM R18, Z // Guardar el número actual
+0000bd b92b                      		OUT PORTD, R18 // Mostrar el número 0
+0000be cfee                      		RJMP Regreso_ISR_timer
+                                 
+                                 	Overflow:
+0000bf e010                      		LDI R17, 0x00
+0000c0 cffa                      		RJMP Display_unidades
+                                 		
                                  // *********************************************************************************************************************************************//
                                  // Tablas de datos
                                  
                                  	Table_7seg:
-00006e 81e7
-00006f d3d6
-000070 73b1
-000071 c177
-000072 f1f7
-000073 37f5
-000074 9766
+0000c1 81e7
+0000c2 d3d6
+0000c3 73b1
+0000c4 c177
+0000c5 f1f7
+0000c6 37f5
+0000c7 9766
 
 
 RESOURCE USE INFORMATION
@@ -1211,40 +1286,40 @@ counted separately from r26..r31 here.
 .dseg memory usage only counts static data declared with .byte
 
 "ATmega328P" register use summary:
-x  :   0 y  :   0 z  :   1 r0 :   0 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
+x  :   0 y  :   0 z  :   2 r0 :   0 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
 r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 
-r13:   0 r14:   0 r15:   0 r16:  47 r17:   8 r18:  10 r19:   0 r20:   0 
+r13:   0 r14:   0 r15:   0 r16:  74 r17:  16 r18:  16 r19:   0 r20:   0 
 r21:   0 r22:   0 r23:   0 r24:   0 r25:   6 r26:   6 r27:   0 r28:   0 
-r29:   0 r30:   1 r31:   1 
+r29:   0 r30:   3 r31:   2 
 Registers used: 8 out of 35 (22.9%)
 
 "ATmega328P" instruction use summary:
-.lds  :   0 .sts  :   0 adc   :   0 add   :   0 adiw  :   0 and   :   0 
+.lds  :   0 .sts  :   0 adc   :   0 add   :   1 adiw  :   0 and   :   0 
 andi  :   6 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
-brcc  :   0 brcs  :   0 break :   0 breq  :   4 brge  :   0 brhc  :   0 
+brcc  :   0 brcs  :   0 break :   0 breq  :   5 brge  :   0 brhc  :   0 
 brhs  :   0 brid  :   0 brie  :   0 brlo  :   0 brlt  :   0 brmi  :   0 
-brne  :   0 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
+brne  :   1 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
 brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   0 cbr   :   1 
 clc   :   0 clh   :   0 cli   :   1 cln   :   0 clr   :   1 cls   :   0 
 clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   0 cpc   :   0 
-cpi   :   4 cpse  :   0 dec   :   1 eor   :   0 fmul  :   0 fmuls :   0 
-fmulsu:   0 icall :   0 ijmp  :   0 in    :   2 inc   :   1 jmp   :   1 
-ld    :   0 ldd   :   0 ldi   :  19 lds   :   5 lpm   :   2 lsl   :   0 
+cpi   :   6 cpse  :   0 dec   :   1 eor   :   0 fmul  :   0 fmuls :   0 
+fmulsu:   0 icall :   0 ijmp  :   0 in    :   3 inc   :   3 jmp   :   1 
+ld    :   0 ldd   :   0 ldi   :  32 lds   :   7 lpm   :   4 lsl   :   0 
 lsr   :   0 mov   :   3 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
-neg   :   0 nop   :   0 or    :   0 ori   :   1 out   :  11 pop   :   6 
-push  :   6 rcall :   0 ret   :   0 reti  :   1 rjmp  :   5 rol   :   0 
+neg   :   0 nop   :   0 or    :   0 ori   :   1 out   :  16 pop   :  10 
+push  :  10 rcall :   0 ret   :   0 reti  :   2 rjmp  :   9 rol   :   0 
 ror   :   0 sbc   :   0 sbci  :   0 sbi   :   0 sbic  :   0 sbis  :   0 
 sbiw  :   0 sbr   :   0 sbrc  :   0 sbrs  :   0 sec   :   0 seh   :   0 
 sei   :   1 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
-sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 sts   :   8 
+sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 sts   :  16 
 sub   :   0 subi  :   0 swap  :   0 tst   :   0 wdr   :   0 
-Instructions used: 22 out of 113 (19.5%)
+Instructions used: 24 out of 113 (21.2%)
 
 "ATmega328P" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x0000ec    206     16    222   32768   0.7%
-[.dseg] 0x000100 0x000102      0      2      2    2048   0.1%
+[.cseg] 0x000000 0x000192    326     16    342   32768   1.0%
+[.dseg] 0x000100 0x000104      0      4      4    2048   0.2%
 [.eseg] 0x000000 0x000000      0      0      0    1024   0.0%
 
 Assembly complete, 0 errors, 0 warnings

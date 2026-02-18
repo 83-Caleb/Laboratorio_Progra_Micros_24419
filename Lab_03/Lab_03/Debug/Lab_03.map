@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.8  C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm Tue Feb 17 13:02:08 2026
+AVRASM ver. 2.2.8  C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm Tue Feb 17 23:15:43 2026
 
 
 EQU  SIGNATURE_000 0000001e
@@ -697,11 +697,17 @@ EQU  SPMRaddr     00000032
 EQU  INT_VECTORS_SIZE 00000034
 DSEG botones      00000100
 DSEG contador     00000101
-CSEG start        00000009
-CSEG ISR_PCINT1   0000003a
-CSEG Table_7seg   0000006e
-CSEG Main         00000038
-CSEG ISR_return   00000055
-CSEG Boton_inc    0000005f
-CSEG Boton_dec    00000063
-CSEG Mostrar_contador 00000067
+DSEG L_ciclos     00000102
+DSEG unidades_7seg 00000103
+CSEG start        00000021
+CSEG ISR_PCINT1   00000068
+CSEG ISR_timer    0000009c
+CSEG Table_7seg   000000c1
+CSEG Main         00000066
+CSEG ISR_return   00000083
+CSEG Boton_inc    0000008d
+CSEG Boton_dec    00000091
+CSEG Mostrar_contador 00000095
+CSEG Regreso_ISR_timer 000000ad
+CSEG Overflow     000000bf
+CSEG Display_unidades 000000bb
