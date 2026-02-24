@@ -27,17 +27,25 @@
   <contador><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>9</LINE></contador>
   <L_ciclos><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>10</LINE></L_ciclos>
   <unidades_7seg><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>11</LINE></unidades_7seg>
-  <start><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>24</LINE></start>
-  <ISR_PCINT1><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>118</LINE></ISR_PCINT1>
-  <ISR_timer><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>183</LINE></ISR_timer>
-  <Table_7seg><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>233</LINE></Table_7seg>
-  <Main><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>111</LINE></Main>
-  <ISR_return><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>153</LINE></ISR_return>
-  <Boton_inc><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>164</LINE></Boton_inc>
-  <Boton_dec><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>169</LINE></Boton_dec>
-  <Mostrar_contador><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>174</LINE></Mostrar_contador>
-  <Regreso_ISR_timer><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>202</LINE></Regreso_ISR_timer>
-  <Overflow><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>226</LINE></Overflow>
-  <Display_unidades><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>219</LINE></Display_unidades>
+  <decenas_7seg><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>12</LINE></decenas_7seg>
+  <display_unidades><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>13</LINE></display_unidades>
+  <display_decenas><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>14</LINE></display_decenas>
+  <display_activo><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>15</LINE></display_activo>
+  <start><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>31</LINE></start>
+  <ISR_PCINT1><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>138</LINE></ISR_PCINT1>
+  <ISR_timer2><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>265</LINE></ISR_timer2>
+  <ISR_timer0><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>203</LINE></ISR_timer0>
+  <Table_7seg><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>308</LINE></Table_7seg>
+  <Main><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>131</LINE></Main>
+  <ISR_return><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>173</LINE></ISR_return>
+  <Boton_inc><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>184</LINE></Boton_inc>
+  <Boton_dec><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>189</LINE></Boton_dec>
+  <Mostrar_contador><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>194</LINE></Mostrar_contador>
+  <Regreso_ISR_timer0><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>224</LINE></Regreso_ISR_timer0>
+  <Overflow_unidades><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>255</LINE></Overflow_unidades>
+  <Actualizar_displays><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>239</LINE></Actualizar_displays>
+  <Mostrar_unidades><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>289</LINE></Mostrar_unidades>
+  <Mostrar_decenas><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>280</LINE></Mostrar_decenas>
+  <Regreso_ISR_timer2><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm</FILE><LINE>298</LINE></Regreso_ISR_timer2>
  </LABELS>
 </ASSEMBLER_INFO>

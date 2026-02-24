@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.8  C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm Tue Feb 17 23:15:43 2026
+AVRASM ver. 2.2.8  C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Lab_03\Lab_03\main.asm Tue Feb 24 09:58:57 2026
 
 
 EQU  SIGNATURE_000 0000001e
@@ -699,15 +699,23 @@ DSEG botones      00000100
 DSEG contador     00000101
 DSEG L_ciclos     00000102
 DSEG unidades_7seg 00000103
+DSEG decenas_7seg 00000104
+DSEG display_unidades 00000105
+DSEG display_decenas 00000106
+DSEG display_activo 00000107
 CSEG start        00000021
-CSEG ISR_PCINT1   00000068
-CSEG ISR_timer    0000009c
-CSEG Table_7seg   000000c1
-CSEG Main         00000066
-CSEG ISR_return   00000083
-CSEG Boton_inc    0000008d
-CSEG Boton_dec    00000091
-CSEG Mostrar_contador 00000095
-CSEG Regreso_ISR_timer 000000ad
-CSEG Overflow     000000bf
-CSEG Display_unidades 000000bb
+CSEG ISR_PCINT1   0000007c
+CSEG ISR_timer2   000000e7
+CSEG ISR_timer0   000000b0
+CSEG Table_7seg   0000010b
+CSEG Main         0000007a
+CSEG ISR_return   00000097
+CSEG Boton_inc    000000a1
+CSEG Boton_dec    000000a5
+CSEG Mostrar_contador 000000a9
+CSEG Regreso_ISR_timer0 000000c4
+CSEG Overflow_unidades 000000e0
+CSEG Actualizar_displays 000000d3
+CSEG Mostrar_unidades 000000fd
+CSEG Mostrar_decenas 000000f4
+CSEG Regreso_ISR_timer2 00000106

@@ -1,5 +1,5 @@
 ; Programación de Microcontroladores
-; Lab 02
+; Lab 03
 ; Caleb Portillo - 24419
 
 .include "M328PDEF.inc" // Nombres de registros específicos del ATmega328P
@@ -9,6 +9,10 @@ botones: .byte 1
 contador: .byte 1
 L_ciclos: .byte 1
 unidades_7seg: .byte 1
+decenas_7seg: .byte 1
+display_unidades: .byte 1
+display_decenas: .byte 1
+display_activo: .byte 1
 
 // *********************************************************************************************************************************************//
 .cseg
@@ -18,8 +22,11 @@ unidades_7seg: .byte 1
 .org PCI1addr // Interrupción para pin change en PORTC
 	RJMP ISR_PCINT1
 
-.org OVF0addr // Interrupción por timer
-	RJMP ISR_timer
+.org OVF2addr // Interrupción de timer2
+	RJMP ISR_timer2
+
+.org OVF0addr // Interrupción por timer0
+	RJMP ISR_timer0
 	
 	start:
 	CLI
@@ -36,13 +43,23 @@ unidades_7seg: .byte 1
 		LDI R16, 0x03 // Set del CLKPS2 (0000_0011), que divide entre 8
 		STS CLKPR, R16
 
-	// Timer
+	// Timer0
 		LDI R16, (1<<CS02) // CLK a 256
 		OUT TCCR0B, R16
 		LDI R16, 100 // Empezamos a contar en 100
 		OUT TCNT0, R16
 		LDI R16, (1<<TOIE0) // Enable de la interrupción Timer/Counter0
 		STS TIMSK0, R16
+
+	// Timer2
+		LDI R16, 0x00
+		STS TCCR2A, R16 // Timer2 en modo normal
+		LDI R16, (1<<CS22)|(1<<CS21)|(1<<CS20) // Prescaler 1024
+		STS TCCR2B, R16
+		LDI R16, 240 // Empezar a contar desde 240
+		STS TCNT2, R16
+		LDI R16, (1<<TOIE2) // Enable del overflow interrupt
+		STS TIMSK2, R16
 		
 	// DESHABILITAR ADC (Si no, no se puede usar PORTC como pines digitales (Se les conectaron las LEDs del contador y los botones)
 		lds r16, ADCSRA
@@ -73,6 +90,10 @@ unidades_7seg: .byte 1
 		LDI ZH, HIGH(Table_7seg<<1)
 		LDI ZL, LOW(Table_7seg<<1)
 
+		LPM R16, Z // Ambos displays comienzan en 0
+		STS display_unidades, R16
+		STS display_decenas, R16
+
 	// Configurar interrupciones por pin change
 		LDI R16, (1<<PCIE1) // Enable del PORTC
 		STS PCICR, R16
@@ -83,13 +104,12 @@ unidades_7seg: .byte 1
 		CLR R16
 		LDI R17, 0x00 // Para leer la pulsación de los botones
 		LDI R18, 0x00 // Para guardar el estado actual del contador de 4 bits (LEDs rojas)
-
+		LDI R19, 0x00 // Usos varios
 		LDI R25, 0x00 // Lectura del botón PC4 (incremento)
 		LDI R26, 0x00 // Lectura del botón PC5 (decremento)
 
 		LDI R16, 0x30 // Estado inicial de los botones
 		STS botones, R16
-
 		LDI R16, 0x00 // Estado inicial del contador
 		STS contador, R16
 
@@ -98,10 +118,10 @@ unidades_7seg: .byte 1
 
 		LDI R16, 0x00
 		STS contador, R16
-		LDI R16, 0x00          ; <-- Esto falta
-		STS unidades_7seg, R16 ; <-- Agregar estas dos líneas
-		LDI R16, 0x00
-		STS L_ciclos, R16      ; También considera inicializar L_ciclos por la misma razón
+		STS unidades_7seg, R16
+		STS decenas_7seg, R16
+		STS L_ciclos, R16
+		STS display_activo, R16
 
 		SEI // Habilitar interrupciones
 
@@ -179,54 +199,109 @@ unidades_7seg: .byte 1
 		OUT PORTC, R16		
 		RJMP ISR_return
 
-// Por timer
-	ISR_timer:
+// Por timer0 (para contar 60 segundos y guardar el valor de cada display)
+	ISR_timer0:
 		PUSH R16
 		IN   R16, SREG
 		PUSH R16
 		PUSH R17
 		PUSH R18
+		PUSH R19
 
 		LDS R17, unidades_7seg
+		LDS R19, decenas_7seg
 		LDS R16, L_ciclos
 		INC R16
 		CPI R16, 50 // Son iguales si ya pasaron 50 ciclos de 20ms
-		BRNE Regreso_ISR_timer
+		BRNE Regreso_ISR_timer0
 		LDI R16, 0x00 // Reiniciar el contador de ciclos
 
 		INC R17
-		CPI R17, 0x10 // Si el display ya pasó de F, regresamos a 0
-		BREQ Overflow
-		RJMP Display_unidades
+		CPI R17, 0x0A // Si el display ya pasó de 9, regresamos a 0
+		BREQ Overflow_unidades
+		RJMP Actualizar_displays
 
-	Regreso_ISR_timer:
-
+	Regreso_ISR_timer0:
 		LDI R18, 100 // Empezamos a contar en 100
 		OUT TCNT0, R18
 
-		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
-		LDI ZL, LOW(Table_7seg<<1)
-
 		STS L_ciclos, R16 // Guardamos los nuevos valores del contador de ciclos y el display
 		STS unidades_7seg, R17
+		STS decenas_7seg, R19
+		POP R19
 		POP R18
 		POP R17
 		POP R16
-		OUT  SREG, R16
-		POP  R16
+		OUT SREG, R16
+		POP R16
 		RETI
 
-	Display_unidades:
-
+	Actualizar_displays:
+		// Unidades
+		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
+		LDI ZL, LOW(Table_7seg<<1)
 		ADD ZL, R17
-		LPM R18, Z // Guardar el número actual
-		OUT PORTD, R18 // Mostrar el número 0
-		RJMP Regreso_ISR_timer
+		LPM R18, Z
+		STS display_unidades, R18
 
-	Overflow:
+		// Decenas
+		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
+		LDI ZL, LOW(Table_7seg<<1)
+		ADD ZL, R19
+		LPM R18, Z
+		STS display_decenas, R18
+		RJMP Regreso_ISR_timer0
+
+	Overflow_unidades:
 		LDI R17, 0x00
-		RJMP Display_unidades
+		INC R19
+		LDI R18, 0x06
+		CPSE R19, R18
+		RJMP Actualizar_displays
+		LDI R19, 0x00
+		RJMP Actualizar_displays
 		
+// Por timer2 (Multiplexar los displays)
+	ISR_timer2:
+		PUSH R16
+		IN   R16, SREG
+		PUSH R16
+		PUSH R17
+
+		LDI R16, 240 // Recargar el valor para TCNT2 inmediatamente
+		STS TCNT2, R16
+		LDI R16, 0x00
+		OUT PORTB, R16 // Ambos displays apagados por un instante
+
+		LDS R16, display_activo
+		CPI R16, 0x00
+		BREQ Mostrar_unidades
+
+	Mostrar_decenas:
+		LDS R17, display_decenas // Guardamos el valor correspondiente a las decenas
+		OUT PORTD, R17
+		LDI R16, 0x04 // Display de decenas encendido
+		OUT PORTB, R16
+		LDI R16, 0x00 // Guardamos  en el display_activo, para que en el siguiente ciclo se muestren las unidades
+		STS display_activo, R16
+		RJMP Regreso_ISR_timer2
+
+	Mostrar_unidades:
+		LDS R17, display_unidades // Guardamos el valor correspondiente a las unidades
+		OUT PORTD, R17
+		LDI R16, 0x02 // Display de unidades encendido
+		OUT PORTB, R16
+		LDI R16, 0x01 // Guardamos 1 en el display_activo, para que en el siguiente ciclo se muestren las decenas
+		STS display_activo, R16
+		RJMP Regreso_ISR_timer2
+
+	Regreso_ISR_timer2:
+		POP R17
+		POP R16
+		OUT SREG, R16
+		POP R16
+		RETI
+
 // *********************************************************************************************************************************************//
 // Tablas de datos
 
