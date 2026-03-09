@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.8  C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm Sun Mar 08 21:39:00 2026
+AVRASM ver. 2.2.8  C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm Sun Mar 08 22:41:36 2026
 
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc'
 C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm(7): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
@@ -1071,16 +1071,16 @@ C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_r
 000000 c020                        	RJMP start
                                  
                                  .org PCI0addr // Interrupción para pin change en PORTB
-000006 c0c4                      	RJMP ISR_PCINT0
+000006 c0df                      	RJMP ISR_PCINT0
                                  
                                  .org OVF2addr // Interrupción por timer2
-000012 c0ea                      	RJMP ISR_timer2
+000012 c105                      	RJMP ISR_timer2
                                  
                                  .org OVF1addr // Interrupción por timer1
-00001a c119                      	RJMP ISR_timer1
+00001a c134                      	RJMP ISR_timer1
                                  
                                  .org OVF0addr // Interrupción por timer0
-000020 c143                      	RJMP ISR_timer0
+000020 c15e                      	RJMP ISR_timer0
                                  	
                                  // *********************************************************************************************************************************************//
                                  // Configuraciones generales del microcontrolador
@@ -1163,7 +1163,7 @@ C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_r
                                  
                                  	// Configuración del vector z
 000068 e0f3                      		LDI ZH, HIGH(Table_7seg<<1)
-000069 e0e2                      		LDI ZL, LOW(Table_7seg<<1)
+000069 e3e8                      		LDI ZL, LOW(Table_7seg<<1)
                                  
                                  	// Inicializar registros a utilizar
                                  
@@ -1204,63 +1204,93 @@ C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_r
 000096 2777                      		CLR R23
 000097 2788                      		CLR R24
                                  
-                                 		/*
                                  		// Estado incial de los displays (solo durante la carga inicial)
-                                 		LPM R16, Z // Guardar el número actual (0 en el display)
-                                 		OUT PORTD, R16 // Mostrar el número 0 */
+000098 9104                      		LPM R16, Z // Guardar el número actual (0 en el display)
+000099 b90b                      		OUT PORTD, R16 // Mostrar el número 0
                                  
-000098 9478                      		SEI // Habilitar interrupciones globales
+00009a 9478                      		SEI // Habilitar interrupciones globales
                                  
                                  // *********************************************************************************************************************************************//
                                  // Programa principal
-                                 
-                                 	Verificar_CONFIG:
-000099 9100 010f                 		LDS R16, config
-00009b 3f0f                      		CPI R16, 0xFF
-00009c f421                      		BRNE CONFIG_0
-00009d c000                      		RJMP CONFIG_1
-                                 
-                                 	CONFIG_1:
-00009e 9a40                      		SBI PORTC, 0
-00009f 9a41                      		SBI PORTC, 1
-0000a0 c003                      		RJMP Verificar_MODO
-                                 
-                                 	CONFIG_0:
-0000a1 9840                      		CBI PORTC, 0
-0000a2 9841                      		CBI PORTC, 1
-0000a3 c000                      		RJMP Verificar_MODO
-                                 
                                  	Verificar_MODO:
-0000a4 9100 0110                 		LDS R16, modo
-0000a6 3f0f                      		CPI R16, 0xFF
-0000a7 f409                      		BRNE HORA
-0000a8 c011                      		RJMP FECHA
+00009b 9100 0110                 		LDS R16, modo
+00009d 3f0f                      		CPI R16, 0xFF
+00009e f409                      		BRNE HORA
+00009f c023                      		RJMP FECHA
                                  
                                  	HORA:
-0000a9 9100 0107                 		LDS R16, u_minutos
-0000ab 9300 0105                 		STS disp_d2, R16
-0000ad 9100 0108                 		LDS R16, d_minutos
-0000af 9300 0104                 		STS disp_d1, R16
+                                 		// Unidades de minutos
+0000a0 e0f3                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
+0000a1 e3e8                      		LDI ZL, LOW(Table_7seg<<1)
+0000a2 9100 0107                 		LDS R16, u_minutos
+0000a4 0fe0                      		ADD ZL, R16
+0000a5 9114                      		LPM R17, Z
+0000a6 9310 0105                 		STS disp_d2, R17
                                  
-0000b1 9100 0109                 		LDS R16, u_horas
-0000b3 9300 0103                 		STS disp_i2, R16
-0000b5 9100 010a                 		LDS R16, d_horas
-0000b7 9300 0102                 		STS disp_i1, R16
+                                 		// Decenas de minutos
+0000a8 e0f3                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
+0000a9 e3e8                      		LDI ZL, LOW(Table_7seg<<1)
+0000aa 9100 0108                 		LDS R16, d_minutos
+0000ac 0fe0                      		ADD ZL, R16
+0000ad 9114                      		LPM R17, Z
+0000ae 9310 0104                 		STS disp_d1, R17
                                  
-0000b9 cfdf                      		RJMP Verificar_CONFIG
+                                 		// Unidades de horas
+0000b0 e0f3                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
+0000b1 e3e8                      		LDI ZL, LOW(Table_7seg<<1)
+0000b2 9100 0109                 		LDS R16, u_horas
+0000b4 0fe0                      		ADD ZL, R16
+0000b5 9114                      		LPM R17, Z
+0000b6 9310 0103                 		STS disp_i2, R17
+                                 
+                                 		// Decenas de horas
+0000b8 e0f3                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
+0000b9 e3e8                      		LDI ZL, LOW(Table_7seg<<1)
+0000ba 9100 010a                 		LDS R16, d_horas
+0000bc 0fe0                      		ADD ZL, R16
+0000bd 9114                      		LPM R17, Z
+0000be 9310 0102                 		STS disp_i1, R17
+                                 
+0000c0 9a40                      		SBI PORTC, PORTC0
+0000c1 9841                      		CBI PORTC, PORTC1
+0000c2 cfd8                      		RJMP Verificar_MODO
                                  
                                  	FECHA:
-0000ba 9100 010b                 		LDS R16, u_dias
-0000bc 9300 0105                 		STS disp_d2, R16
-0000be 9100 010c                 		LDS R16, d_dias
-0000c0 9300 0104                 		STS disp_d1, R16
+                                 		// Unidades de dias
+0000c3 e0f3                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
+0000c4 e3e8                      		LDI ZL, LOW(Table_7seg<<1)
+0000c5 9100 010b                 		LDS R16, u_dias
+0000c7 0fe0                      		ADD ZL, R16
+0000c8 9114                      		LPM R17, Z
+0000c9 9310 0105                 		STS disp_d2, R17
                                  
-0000c2 9100 010d                 		LDS R16, u_meses
-0000c4 9300 0103                 		STS disp_i2, R16
-0000c6 9100 010e                 		LDS R16, d_meses
-0000c8 9300 0102                 		STS disp_i1, R16
+                                 		// Decenas de dias
+0000cb e0f3                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
+0000cc e3e8                      		LDI ZL, LOW(Table_7seg<<1)
+0000cd 9100 010c                 		LDS R16, d_dias
+0000cf 0fe0                      		ADD ZL, R16
+0000d0 9114                      		LPM R17, Z
+0000d1 9310 0104                 		STS disp_d1, R17
+                                 
+                                 		// Unidades de meses
+0000d3 e0f3                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
+0000d4 e3e8                      		LDI ZL, LOW(Table_7seg<<1)
+0000d5 9100 010d                 		LDS R16, u_meses
+0000d7 0fe0                      		ADD ZL, R16
+0000d8 9114                      		LPM R17, Z
+0000d9 9310 0103                 		STS disp_i2, R17
+                                 
+                                 		// Decenas de meses
+0000db e0f3                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
+0000dc e3e8                      		LDI ZL, LOW(Table_7seg<<1)
+0000dd 9100 010e                 		LDS R16, d_meses
+0000df 0fe0                      		ADD ZL, R16
+0000e0 9114                      		LPM R17, Z
+0000e1 9310 0102                 		STS disp_i1, R17
                                  		
-0000ca cfce                      		RJMP Verificar_CONFIG
+0000e3 9a41                      		SBI PORTC, PORTC1
+0000e4 9840                      		CBI PORTC, PORTC0
+0000e5 cfb5                      		RJMP Verificar_MODO
                                  
                                  // *********************************************************************************************************************************************//
                                  // Subrutinas de programa
@@ -1270,45 +1300,45 @@ C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_r
                                  
                                  	// Interrupción para pin change en PORTB
                                  	ISR_PCINT0: 
-0000cb 930f                      		PUSH R16
-0000cc b70f                      		IN   R16, SREG
-0000cd 930f                      		PUSH R16
-0000ce 931f                      		PUSH R17
-0000cf 932f                      		PUSH R18
-0000d0 933f                      		PUSH R19
+0000e6 930f                      		PUSH R16
+0000e7 b70f                      		IN   R16, SREG
+0000e8 930f                      		PUSH R16
+0000e9 931f                      		PUSH R17
+0000ea 932f                      		PUSH R18
+0000eb 933f                      		PUSH R19
                                  
-0000d1 b113                      		IN R17, PINB // Lectura del estado actual de los botones
-0000d2 731f                      		ANDI R17, 0x3F // Máscara para solo dejar PB5-0 con valor (no editamos el LED rojo)
+0000ec b113                      		IN R17, PINB // Lectura del estado actual de los botones
+0000ed 731f                      		ANDI R17, 0x3F // Máscara para solo dejar PB5-0 con valor (no editamos el LED rojo)
                                  
                                  		// Verificamos los botones 4-1 (Si actualmente son 1 [no presionado], se ignora la subrutina correspondiente)
-0000d3 9b19                      		SBIS PINB, 1
-0000d4 c013                      		RJMP BOTON_1
+0000ee 9b19                      		SBIS PINB, 1
+0000ef c013                      		RJMP BOTON_1
                                  		//SBIS PINB, 2
                                  		//RJMP BOTON_2
-0000d5 9b1b                      		SBIS PINB, 3
-0000d6 c011                      		RJMP BOTON_3
+0000f0 9b1b                      		SBIS PINB, 3
+0000f1 c011                      		RJMP BOTON_3
                                  		//SBIS PINB, 4
                                  		//RJMP BOTON_4
                                  
                                  		// Verificamos el botón 0 (config)
-0000d7 2f21                      		MOV R18, R17 // Copia del estado actual de los botones
-0000d8 7021                      		ANDI R18, 0x01 // Aislamos bit 0
-0000d9 3020                      		CPI R18, 0x00 // Si es igual a 0, el botón se está presionando y CONFIG debe ser 0xFF
-0000da f049                      		BREQ BOTON_0
+0000f2 2f21                      		MOV R18, R17 // Copia del estado actual de los botones
+0000f3 7021                      		ANDI R18, 0x01 // Aislamos bit 0
+0000f4 3020                      		CPI R18, 0x00 // Si es igual a 0, el botón se está presionando y CONFIG debe ser 0xFF
+0000f5 f049                      		BREQ BOTON_0
                                  
-0000db e021                      		LDI R18, 0x01 // Cargamos 1 en R18
-0000dc 2733                      		CLR R19 // Cargamos 0 en R19
-0000dd 9100 0100                 		LDS R16, botones // Cargamos el estado anterior de los botones
-0000df 7001                      		ANDI R16, 0x01 // Aislamos bit 0
-0000e0 1302                      		CPSE R16, R18 // Si son iguales (BOTON_0 = 1), el botón estaba suelto, así que no hubo flanco de subida y se ignora la siguiente línea
-0000e1 9330 010f                 		STS config, R19 // Si no son iguales (BOTON_0 = 0), el botón estaba presionado y hubo flanco de subida, se resetea la bandera de config
+0000f6 e021                      		LDI R18, 0x01 // Cargamos 1 en R18
+0000f7 2733                      		CLR R19 // Cargamos 0 en R19
+0000f8 9100 0100                 		LDS R16, botones // Cargamos el estado anterior de los botones
+0000fa 7001                      		ANDI R16, 0x01 // Aislamos bit 0
+0000fb 1302                      		CPSE R16, R18 // Si son iguales (BOTON_0 = 1), el botón estaba suelto, así que no hubo flanco de subida y se ignora la siguiente línea
+0000fc 9330 010f                 		STS config, R19 // Si no son iguales (BOTON_0 = 0), el botón estaba presionado y hubo flanco de subida, se resetea la bandera de config
                                  
-0000e3 c010                      		RJMP EXIT_ISR_PCINT0
+0000fe c010                      		RJMP EXIT_ISR_PCINT0
                                  
                                  	BOTON_0:
-0000e4 ef0f                      		LDI R16, 0xFF
-0000e5 9300 010f                 		STS config, R16
-0000e7 c00c                      		RJMP EXIT_ISR_PCINT0
+0000ff ef0f                      		LDI R16, 0xFF
+000100 9300 010f                 		STS config, R16
+000102 c00c                      		RJMP EXIT_ISR_PCINT0
                                  
                                  	BOTON_1:
                                  /*		LDS R16, config
@@ -1322,131 +1352,131 @@ C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_r
                                  		*/
                                  
                                  	BOTON_3:
-0000e8 9130 0110                 		LDS R19, modo
-0000ea 3000                      		CPI R16, 0x00
-0000eb f421                      		BRNE BOTON_3A
-0000ec ef3f                      		LDI R19, 0xFF
-0000ed 9330 0110                 		STS modo, R19
-0000ef c004                      		RJMP EXIT_ISR_PCINT0
+000103 9130 0110                 		LDS R19, modo
+000105 3000                      		CPI R16, 0x00
+000106 f421                      		BRNE BOTON_3A
+000107 ef3f                      		LDI R19, 0xFF
+000108 9330 0110                 		STS modo, R19
+00010a c004                      		RJMP EXIT_ISR_PCINT0
                                  
                                  	BOTON_3A:
-0000f0 e030                      		LDI R19, 0x00
-0000f1 9330 0110                 		STS modo, R19
-0000f3 c000                      		RJMP EXIT_ISR_PCINT0
+00010b e030                      		LDI R19, 0x00
+00010c 9330 0110                 		STS modo, R19
+00010e c000                      		RJMP EXIT_ISR_PCINT0
                                  		
                                  
                                  	EXIT_ISR_PCINT0:
-0000f4 9310 0100                 		STS botones, R17 // Guardamos la lectura realizada como nueva lectura de botones
-0000f6 913f                      		POP R19
-0000f7 912f                      		POP R18
-0000f8 911f                      		POP R17
-0000f9 910f                      		POP R16
-0000fa bf0f                      		OUT SREG, R16
-0000fb 910f                      		POP R16
-0000fc 9518                      		RETI
+00010f 9310 0100                 		STS botones, R17 // Guardamos la lectura realizada como nueva lectura de botones
+000111 913f                      		POP R19
+000112 912f                      		POP R18
+000113 911f                      		POP R17
+000114 910f                      		POP R16
+000115 bf0f                      		OUT SREG, R16
+000116 910f                      		POP R16
+000117 9518                      		RETI
                                  
                                  	// -------------------------------------------------------------------------------------------------------------------------------------------
                                  	// Interrupción de timer2
                                  	ISR_timer2:
-0000fd 930f                      		PUSH R16
-0000fe b70f                      		IN   R16, SREG
-0000ff 930f                      		PUSH R16
-000100 931f                      		PUSH R17
-000101 932f                      		PUSH R18
-000102 933f                      		PUSH R19
+000118 930f                      		PUSH R16
+000119 b70f                      		IN   R16, SREG
+00011a 930f                      		PUSH R16
+00011b 931f                      		PUSH R17
+00011c 932f                      		PUSH R18
+00011d 933f                      		PUSH R19
                                  
-000103 ef0a                      		LDI R16, 250 // Empezamos a contar en 250
-000104 9300 00b2                 		STS TCNT2, R16
+00011e ef0a                      		LDI R16, 250 // Empezamos a contar en 250
+00011f 9300 00b2                 		STS TCNT2, R16
                                  
-000106 b118                      		IN R17, PORTC
-000107 7013                      		ANDI R17, 0b0000_0011 // No modificamos el valor de las LEDs
-000108 b918                      		OUT PORTC, R17 // Displays apagados por un instante
+000121 b118                      		IN R17, PORTC
+000122 7013                      		ANDI R17, 0b0000_0011 // No modificamos el valor de las LEDs
+000123 b918                      		OUT PORTC, R17 // Displays apagados por un instante
                                  
-000109 9120 0101                 		LDS R18, disp_activo
-00010b 3020                      		CPI R18, 0x00
-00010c f031                      		BREQ show_dispd2
-00010d 3021                      		CPI R18, 0x01
-00010e f051                      		BREQ show_dispd1
-00010f 3022                      		CPI R18, 0x02
-000110 f071                      		BREQ show_dispi2
-000111 3023                      		CPI R18, 0x03
-000112 f091                      		BREQ show_dispi1
+000124 9120 0101                 		LDS R18, disp_activo
+000126 3020                      		CPI R18, 0x00
+000127 f031                      		BREQ show_dispd2
+000128 3021                      		CPI R18, 0x01
+000129 f051                      		BREQ show_dispd1
+00012a 3022                      		CPI R18, 0x02
+00012b f071                      		BREQ show_dispi2
+00012c 3023                      		CPI R18, 0x03
+00012d f091                      		BREQ show_dispi1
                                  
                                  	show_dispd2:
-000113 9523                      		INC R18
-000114 9110 0105                 		LDS R17, disp_d2
-000116 b91b                      		OUT PORTD, R17
-000117 9a44                      		SBI PORTC, 4
-000118 c012                      		RJMP RETURN_ISR_timer2
+00012e 9523                      		INC R18
+00012f 9110 0105                 		LDS R17, disp_d2
+000131 b91b                      		OUT PORTD, R17
+000132 9a44                      		SBI PORTC, 4
+000133 c012                      		RJMP RETURN_ISR_timer2
                                  	
                                  	show_dispd1:
-000119 9523                      		INC R18
-00011a 9110 0104                 		LDS R17, disp_d1
-00011c b91b                      		OUT PORTD, R17
-00011d 9a45                      		SBI PORTC, 5
-00011e c00c                      		RJMP RETURN_ISR_timer2
+000134 9523                      		INC R18
+000135 9110 0104                 		LDS R17, disp_d1
+000137 b91b                      		OUT PORTD, R17
+000138 9a45                      		SBI PORTC, 5
+000139 c00c                      		RJMP RETURN_ISR_timer2
                                  	
                                  	show_dispi2:
-00011f 9523                      		INC R18
-000120 9110 0103                 		LDS R17, disp_i2
-000122 b91b                      		OUT PORTD, R17
-000123 9a43                      		SBI PORTC, 3
-000124 c006                      		RJMP RETURN_ISR_timer2
+00013a 9523                      		INC R18
+00013b 9110 0103                 		LDS R17, disp_i2
+00013d b91b                      		OUT PORTD, R17
+00013e 9a43                      		SBI PORTC, 3
+00013f c006                      		RJMP RETURN_ISR_timer2
                                  	
                                  	show_dispi1:
-000125 2722                      		CLR R18
-000126 9110 0102                 		LDS R17, disp_i1
-000128 b91b                      		OUT PORTD, R17
-000129 9a42                      		SBI PORTC, 2
-00012a c000                      		RJMP RETURN_ISR_timer2
+000140 2722                      		CLR R18
+000141 9110 0102                 		LDS R17, disp_i1
+000143 b91b                      		OUT PORTD, R17
+000144 9a42                      		SBI PORTC, 2
+000145 c000                      		RJMP RETURN_ISR_timer2
                                  
                                  	RETURN_ISR_timer2:
-00012b 9320 0101                 		STS disp_activo, R18
-00012d 913f                      		POP R19
-00012e 912f                      		POP R18
-00012f 911f                      		POP R17
-000130 910f                      		POP R16
-000131 bf0f                      		OUT SREG, R16
-000132 910f                      		POP R16
-000133 9518                      		RETI
+000146 9320 0101                 		STS disp_activo, R18
+000148 913f                      		POP R19
+000149 912f                      		POP R18
+00014a 911f                      		POP R17
+00014b 910f                      		POP R16
+00014c bf0f                      		OUT SREG, R16
+00014d 910f                      		POP R16
+00014e 9518                      		RETI
                                  
                                  	// -------------------------------------------------------------------------------------------------------------------------------------------
                                  	ISR_timer1:
-000134 930f                      		PUSH R16
-000135 b70f                      		IN   R16, SREG
-000136 930f                      		PUSH R16
-000137 931f                      		PUSH R17
-000138 932f                      		PUSH R18
-000139 933f                      		PUSH R19
-00013a 934f                      		PUSH R20
-00013b 935f                      		PUSH R21
-00013c 936f                      		PUSH R22
-00013d 937f                      		PUSH R23
-00013e 938f                      		PUSH R24
+00014f 930f                      		PUSH R16
+000150 b70f                      		IN   R16, SREG
+000151 930f                      		PUSH R16
+000152 931f                      		PUSH R17
+000153 932f                      		PUSH R18
+000154 933f                      		PUSH R19
+000155 934f                      		PUSH R20
+000156 935f                      		PUSH R21
+000157 936f                      		PUSH R22
+000158 937f                      		PUSH R23
+000159 938f                      		PUSH R24
                                  
-00013f e10b                      		LDI R16, 0x1B
-000140 9300 0085                 		STS TCNT1H, R16 // Valor inicial H para 60s
-000142 e10e                      		LDI R16, 0x1E
-000143 9300 0084                 		STS TCNT1L, R16 // Valor inicial L para 60s
+00015a e10b                      		LDI R16, 0x1B
+00015b 9300 0085                 		STS TCNT1H, R16 // Valor inicial H para 60s
+00015d e10e                      		LDI R16, 0x1E
+00015e 9300 0084                 		STS TCNT1L, R16 // Valor inicial L para 60s
                                  
-000145 9110 0107                 		LDS R17, u_minutos
-000147 9513                      		INC R17
-000148 301a                      		CPI R17, 0x0A
-000149 f019                      		BREQ INC_d_minutos
-00014a 9310 0107                 		STS u_minutos, R17
-00014c c00b                      		RJMP RETURN_ISR_timer1
+000160 9110 0107                 		LDS R17, u_minutos
+000162 9513                      		INC R17
+000163 301a                      		CPI R17, 0x0A
+000164 f019                      		BREQ INC_d_minutos
+000165 9310 0107                 		STS u_minutos, R17
+000167 c00b                      		RJMP RETURN_ISR_timer1
                                  
                                  	INC_d_minutos:
-00014d e010                      		LDI R17, 0x00
-00014e 9310 0107                 		STS u_minutos, R17
+000168 e010                      		LDI R17, 0x00
+000169 9310 0107                 		STS u_minutos, R17
                                  
-000150 9120 0108                 		LDS R18, d_minutos
-000152 9523                      		INC R18
-000153 332c                      		CPI R18, 60
-000154 f019                      		BREQ INC_u_horas
+00016b 9120 0108                 		LDS R18, d_minutos
+00016d 9523                      		INC R18
+00016e 332c                      		CPI R18, 60
+00016f f019                      		BREQ INC_u_horas
                                  
-000155 9320 0108                 		STS d_minutos, R18
-000157 c000                      		RJMP RETURN_ISR_timer1
+000170 9320 0108                 		STS d_minutos, R18
+000172 c000                      		RJMP RETURN_ISR_timer1
                                  
                                  	INC_u_horas:
                                  
@@ -1462,63 +1492,63 @@ C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_r
                                  
                                  
                                  	RETURN_ISR_timer1:
-000158 918f                      		POP R24
-000159 917f                      		POP R23
-00015a 916f                      		POP R22
-00015b 915f                      		POP R21
-00015c 914f                      		POP R20
-00015d 913f                      		POP R19
-00015e 912f                      		POP R18
-00015f 911f                      		POP R17
-000160 910f                      		POP R16
-000161 bf0f                      		OUT SREG, R16
-000162 910f                      		POP R16
-000163 9518                      		RETI
+000173 918f                      		POP R24
+000174 917f                      		POP R23
+000175 916f                      		POP R22
+000176 915f                      		POP R21
+000177 914f                      		POP R20
+000178 913f                      		POP R19
+000179 912f                      		POP R18
+00017a 911f                      		POP R17
+00017b 910f                      		POP R16
+00017c bf0f                      		OUT SREG, R16
+00017d 910f                      		POP R16
+00017e 9518                      		RETI
                                  
                                  	// -------------------------------------------------------------------------------------------------------------------------------------------
                                  	// Interrupción por timer0
                                  	ISR_timer0:
-000164 930f                      		PUSH R16
-000165 b70f                      		IN   R16, SREG
-000166 930f                      		PUSH R16
-000167 931f                      		PUSH R17
-000168 932f                      		PUSH R18
-000169 933f                      		PUSH R19
-00016a 934f                      		PUSH R20
+00017f 930f                      		PUSH R16
+000180 b70f                      		IN   R16, SREG
+000181 930f                      		PUSH R16
+000182 931f                      		PUSH R17
+000183 932f                      		PUSH R18
+000184 933f                      		PUSH R19
+000185 934f                      		PUSH R20
                                  		
-00016b e00c                      		LDI R16, 12 // Empezamos a contar en 12
-00016c bd06                      		OUT TCNT0, R16
+000186 e00c                      		LDI R16, 12 // Empezamos a contar en 12
+000187 bd06                      		OUT TCNT0, R16
                                  
-00016d 9110 0106                 		LDS R17, cnt_LEDR
-00016f 9513                      		INC R17
-000170 9310 0106                 		STS cnt_LEDR, R17
-000172 3012                      		CPI R17, 2
-000173 f429                      		BRNE RETURN_ISR_timer0
+000188 9110 0106                 		LDS R17, cnt_LEDR
+00018a 9513                      		INC R17
+00018b 9310 0106                 		STS cnt_LEDR, R17
+00018d 3012                      		CPI R17, 2
+00018e f429                      		BRNE RETURN_ISR_timer0
                                  		
-000174 2711                      		CLR R17
-000175 9310 0106                 		STS cnt_LEDR, R17
-000177 9a1d                      		SBI PINB, PINB5
+00018f 2711                      		CLR R17
+000190 9310 0106                 		STS cnt_LEDR, R17
+000192 9a1d                      		SBI PINB, PINB5
                                  
-000178 c000                      		RJMP RETURN_ISR_timer0
+000193 c000                      		RJMP RETURN_ISR_timer0
                                  
                                  	RETURN_ISR_timer0:		
-000179 914f                      		POP R20
-00017a 913f                      		POP R19
-00017b 912f                      		POP R18
-00017c 911f                      		POP R17
-00017d 910f                      		POP R16
-00017e bf0f                      		OUT SREG, R16
-00017f 910f                      		POP R16
-000180 9518                      		RETI 
+000194 914f                      		POP R20
+000195 913f                      		POP R19
+000196 912f                      		POP R18
+000197 911f                      		POP R17
+000198 910f                      		POP R16
+000199 bf0f                      		OUT SREG, R16
+00019a 910f                      		POP R16
+00019b 9518                      		RETI 
                                  
                                  // *********************************************************************************************************************************************//
                                  // Tablas de datos
                                  
                                  	Table_7seg: // Símbolos del 0 al 9
-000181 4277
-000182 6b6d
-000183 3b5a
-000184 623f
+00019c 4277
+00019d 6b6d
+00019e 3b5a
+00019f 623f
 
 
 RESOURCE USE INFORMATION
@@ -1536,39 +1566,39 @@ counted separately from r26..r31 here.
 .dseg memory usage only counts static data declared with .byte
 
 "ATmega328P" register use summary:
-x  :   0 y  :   0 z  :   1 r0 :   0 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
+x  :   0 y  :   0 z  :  10 r0 :   0 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
 r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 
-r13:   0 r14:   0 r15:   0 r16: 132 r17:  36 r18:  28 r19:  16 r20:   5 
+r13:   0 r14:   0 r15:   0 r16: 132 r17:  52 r18:  28 r19:  16 r20:   5 
 r21:   3 r22:   3 r23:   3 r24:   3 r25:   0 r26:   0 r27:   0 r28:   0 
-r29:   0 r30:   1 r31:   1 
+r29:   0 r30:  17 r31:   9 
 Registers used: 12 out of 35 (34.3%)
 
 "ATmega328P" instruction use summary:
-.lds  :   0 .sts  :   0 adc   :   0 add   :   0 adiw  :   0 and   :   0 
+.lds  :   0 .sts  :   0 adc   :   0 add   :   8 adiw  :   0 and   :   0 
 andi  :   4 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
 brcc  :   0 brcs  :   0 break :   0 breq  :   7 brge  :   0 brhc  :   0 
 brhs  :   0 brid  :   0 brie  :   0 brlo  :   0 brlt  :   0 brmi  :   0 
-brne  :   4 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
+brne  :   3 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
 brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   2 cbr   :   1 
 clc   :   0 clh   :   0 cli   :   1 cln   :   0 clr   :  13 cls   :   0 
 clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   0 cpc   :   0 
-cpi   :  11 cpse  :   1 dec   :   0 eor   :   0 fmul  :   0 fmuls :   0 
+cpi   :  10 cpse  :   1 dec   :   0 eor   :   0 fmul  :   0 fmuls :   0 
 fmulsu:   0 icall :   0 ijmp  :   0 in    :   6 inc   :   6 jmp   :   0 
-ld    :   0 ldd   :   0 ldi   :  37 lds   :  21 lpm   :   2 lsl   :   0 
+ld    :   0 ldd   :   0 ldi   :  53 lds   :  20 lpm   :  20 lsl   :   0 
 lsr   :   0 mov   :   1 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
-neg   :   0 nop   :   0 or    :   0 ori   :   0 out   :  20 pop   :  26 
-push  :  26 rcall :   0 ret   :   0 reti  :   4 rjmp  :  24 rol   :   0 
+neg   :   0 nop   :   0 or    :   0 ori   :   0 out   :  21 pop   :  26 
+push  :  26 rcall :   0 ret   :   0 reti  :   4 rjmp  :  21 rol   :   0 
 ror   :   0 sbc   :   0 sbci  :   0 sbi   :   7 sbic  :   0 sbis  :   2 
 sbiw  :   0 sbr   :   0 sbrc  :   0 sbrs  :   0 sec   :   0 seh   :   0 
 sei   :   1 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
 sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 sts   :  55 
 sub   :   0 subi  :   0 swap  :   0 tst   :   0 wdr   :   0 
-Instructions used: 24 out of 113 (21.2%)
+Instructions used: 25 out of 113 (22.1%)
 
 "ATmega328P" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x00030c    714     10    724   32768   2.2%
+[.cseg] 0x000000 0x000342    768     10    778   32768   2.4%
 [.dseg] 0x000100 0x000111      0     17     17    2048   0.8%
 [.eseg] 0x000000 0x000000      0      0      0    1024   0.0%
 

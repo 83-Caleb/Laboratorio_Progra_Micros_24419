@@ -173,32 +173,14 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 		CLR R23
 		CLR R24
 
-		/*
 		// Estado incial de los displays (solo durante la carga inicial)
 		LPM R16, Z // Guardar el número actual (0 en el display)
-		OUT PORTD, R16 // Mostrar el número 0 */
+		OUT PORTD, R16 // Mostrar el número 0
 
 		SEI // Habilitar interrupciones globales
 
 // *********************************************************************************************************************************************//
 // Programa principal
-
-	Verificar_CONFIG:
-		LDS R16, config
-		CPI R16, 0xFF
-		BRNE CONFIG_0
-		RJMP CONFIG_1
-
-	CONFIG_1:
-		SBI PORTC, 0
-		SBI PORTC, 1
-		RJMP Verificar_MODO
-
-	CONFIG_0:
-		CBI PORTC, 0
-		CBI PORTC, 1
-		RJMP Verificar_MODO
-
 	Verificar_MODO:
 		LDS R16, modo
 		CPI R16, 0xFF
@@ -206,30 +188,78 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 		RJMP FECHA
 
 	HORA:
+		// Unidades de minutos
+		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
+		LDI ZL, LOW(Table_7seg<<1)
 		LDS R16, u_minutos
-		STS disp_d2, R16
+		ADD ZL, R16
+		LPM R17, Z
+		STS disp_d2, R17
+
+		// Decenas de minutos
+		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
+		LDI ZL, LOW(Table_7seg<<1)
 		LDS R16, d_minutos
-		STS disp_d1, R16
+		ADD ZL, R16
+		LPM R17, Z
+		STS disp_d1, R17
 
+		// Unidades de horas
+		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
+		LDI ZL, LOW(Table_7seg<<1)
 		LDS R16, u_horas
-		STS disp_i2, R16
-		LDS R16, d_horas
-		STS disp_i1, R16
+		ADD ZL, R16
+		LPM R17, Z
+		STS disp_i2, R17
 
-		RJMP Verificar_CONFIG
+		// Decenas de horas
+		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
+		LDI ZL, LOW(Table_7seg<<1)
+		LDS R16, d_horas
+		ADD ZL, R16
+		LPM R17, Z
+		STS disp_i1, R17
+
+		SBI PORTC, PORTC0
+		CBI PORTC, PORTC1
+		RJMP Verificar_MODO
 
 	FECHA:
+		// Unidades de dias
+		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
+		LDI ZL, LOW(Table_7seg<<1)
 		LDS R16, u_dias
-		STS disp_d2, R16
-		LDS R16, d_dias
-		STS disp_d1, R16
+		ADD ZL, R16
+		LPM R17, Z
+		STS disp_d2, R17
 
+		// Decenas de dias
+		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
+		LDI ZL, LOW(Table_7seg<<1)
+		LDS R16, d_dias
+		ADD ZL, R16
+		LPM R17, Z
+		STS disp_d1, R17
+
+		// Unidades de meses
+		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
+		LDI ZL, LOW(Table_7seg<<1)
 		LDS R16, u_meses
-		STS disp_i2, R16
+		ADD ZL, R16
+		LPM R17, Z
+		STS disp_i2, R17
+
+		// Decenas de meses
+		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
+		LDI ZL, LOW(Table_7seg<<1)
 		LDS R16, d_meses
-		STS disp_i1, R16
+		ADD ZL, R16
+		LPM R17, Z
+		STS disp_i1, R17
 		
-		RJMP Verificar_CONFIG
+		SBI PORTC, PORTC1
+		CBI PORTC, PORTC0
+		RJMP Verificar_MODO
 
 // *********************************************************************************************************************************************//
 // Subrutinas de programa
