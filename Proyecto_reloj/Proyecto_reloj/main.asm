@@ -11,6 +11,7 @@
 .dseg 
 botones: .byte 1 // Para guardar el estado de los botones
 disp_activo: .byte 1 // Para saber qué display está encendido en este instante
+disp_config: .byte 1 // Para saber qué display estamos configurando
 
 // Códigos HEX de cada display
 disp_i1: .byte 1 // Display izquierda 1
@@ -151,16 +152,20 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 		STS config, R16
 		STS modo, R16
 		STS disp_activo, R16
+		STS disp_config, R16
 		
 		STS cnt_LEDR, R16
 		STS u_minutos, R16
 		STS d_minutos, R16
 		STS u_horas, R16
 		STS d_horas, R16
-		STS u_dias, R16
 		STS d_dias, R16
-		STS u_meses, R16
 		STS d_meses, R16
+
+		LDI R16, 0x01
+		STS u_dias, R16
+		STS u_meses, R16
+
 
 		// Registros de propósito general
 		CLR R16
@@ -181,6 +186,7 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 
 // *********************************************************************************************************************************************//
 // Programa principal
+
 	Verificar_MODO:
 		LDS R16, modo
 		CPI R16, 0xFF
@@ -222,7 +228,7 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 
 		SBI PORTC, PORTC0
 		CBI PORTC, PORTC1
-		RJMP Verificar_MODO
+		RJMP Verificar_OVF
 
 	FECHA:
 		// Unidades de dias
@@ -231,7 +237,7 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 		LDS R16, u_dias
 		ADD ZL, R16
 		LPM R17, Z
-		STS disp_d2, R17
+		STS disp_i2, R17
 
 		// Decenas de dias
 		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
@@ -239,7 +245,7 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 		LDS R16, d_dias
 		ADD ZL, R16
 		LPM R17, Z
-		STS disp_d1, R17
+		STS disp_i1, R17
 
 		// Unidades de meses
 		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
@@ -247,7 +253,7 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 		LDS R16, u_meses
 		ADD ZL, R16
 		LPM R17, Z
-		STS disp_i2, R17
+		STS disp_d2, R17
 
 		// Decenas de meses
 		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
@@ -255,12 +261,14 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 		LDS R16, d_meses
 		ADD ZL, R16
 		LPM R17, Z
-		STS disp_i1, R17
+		STS disp_d1, R17
 		
 		SBI PORTC, PORTC1
 		CBI PORTC, PORTC0
-		RJMP Verificar_MODO
+		RJMP Verificar_OVF
 
+
+		RJMP Verificar_MODO
 // *********************************************************************************************************************************************//
 // Subrutinas de programa
 
@@ -306,32 +314,37 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 
 	BOTON_0:
 		LDI R16, 0xFF
-		STS config, R16
+		STS config, R16 // Activamos configuración: config = 0xFF
+
+		CLR R16
+		STS disp_config, R16 // El display a configurar es el 0 (d2)
 		RJMP EXIT_ISR_PCINT0
 
 	BOTON_1:
-/*		LDS R16, config
+		LDS R16, config
 		CPI R16, 0xFF
-		BRNE EXIT_ISR_PCINT0
+		BREQ EXIT_ISR_PCINT0 // Si no estamos en configuración, no tiene efecto la pulsación
 
-		INC disp_i1
-		ADD Z, disp_i1 
-		LPM R16, Z
-		STS disp_i1, R16
-		*/
+		LDS R16, modo
+		CPI R16, 0x00
 
+		B1_INC_MENU:
+			
+
+		RJMP EXIT_ISR_PCINT0
+		
 	BOTON_3:
 		LDS R19, modo
-		CPI R16, 0x00
+		CPI R19, 0x00
 		BRNE BOTON_3A
 		LDI R19, 0xFF
 		STS modo, R19
 		RJMP EXIT_ISR_PCINT0
 
-	BOTON_3A:
-		LDI R19, 0x00
-		STS modo, R19
-		RJMP EXIT_ISR_PCINT0
+		BOTON_3A: // Reset de modo
+			LDI R19, 0x00
+			STS modo, R19
+			RJMP EXIT_ISR_PCINT0
 		
 
 	EXIT_ISR_PCINT0:
@@ -428,6 +441,10 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 		LDI R16, 0x1E
 		STS TCNT1L, R16 // Valor inicial L para 60s
 
+		LDS R16, config
+		CPI R16, 0xFF
+		BREQ RETURN_ISR_timer1
+
 		LDS R17, u_minutos
 		INC R17
 		CPI R17, 0x0A
@@ -441,24 +458,85 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 
 		LDS R18, d_minutos
 		INC R18
-		CPI R18, 60
+		CPI R18, 6
 		BREQ INC_u_horas
 
 		STS d_minutos, R18
 		RJMP RETURN_ISR_timer1
 
 	INC_u_horas:
+		LDI R18, 0x00
+		STS d_minutos, R18
+
+		LDS R19, u_horas
+		INC R19
+		CPI R19, 0x0A
+		BREQ INC_d_horas
+
+		STS u_horas, R19
+		RJMP RETURN_ISR_timer1
 
 	INC_d_horas:
+		LDI R19, 0x00
+		STS u_horas, R19
 
+		LDS R20, d_horas
+		INC R20
+		CPI R20, 2
+//		BREQ INC_u_dias
+
+		STS d_horas, R20
+		RJMP RETURN_ISR_timer1
+/*
 	INC_u_dias:
+		LDI R20, 0x00
+		STS d_horas, R20
+
+		LDS R21, u_dias
+		INC R21
+		CPI R21, 0x0A
+		BREQ INC_d_dias
+
+		STS u_dias, R21
+		RJMP RETURN_ISR_timer1
 
 	INC_d_dias:
+		LDI R21, 0x00
+		STS u_dias, R21
 
+		LDS R22, d_dias
+		INC R22
+		CPI R22, 3
+		BREQ INC_u_meses
+
+		STS d_dias, R22
+		RJMP RETURN_ISR_timer1
+	
 	INC_u_meses:
+		LDI R22, 0x00
+		STS d_dias, R22
+
+		LDS R23, u_meses
+		INC R23
+		CPI R23, 0x0A
+		BREQ INC_d_meses
+
+		STS u_meses, R23
+		RJMP RETURN_ISR_timer1
 
 	INC_d_meses:
+		LDI R23, 0x00
+		STS u_meses, R23
 
+		LDS R24, d_meses
+		INC R24
+		STS d_meses, R24
+		CPI R24, 2
+		BRNE RETURN_ISR_timer1
+
+		LDI R24, 0x00
+		STS d_meses, R24
+		RJMP RETURN_ISR_timer1 */
 
 	RETURN_ISR_timer1:
 		POP R24
@@ -487,6 +565,10 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 		
 		LDI R16, 12 // Empezamos a contar en 12
 		OUT TCNT0, R16
+
+		LDS R16, config
+		CPI R16, 0xFF
+		BREQ RETURN_ISR_timer0
 
 		LDS R17, cnt_LEDR
 		INC R17
