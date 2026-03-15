@@ -1,12 +1,12 @@
 
-AVRASM ver. 2.2.8  C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm Sun Mar 15 01:18:22 2026
+AVRASM ver. 2.2.8  C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Prueba_buzzer\Prueba_buzzer\main.asm Sat Mar 14 13:58:19 2026
 
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc'
-C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm(7): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
+C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Prueba_buzzer\Prueba_buzzer\main.asm(1): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc'
-C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm(7): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
+C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Prueba_buzzer\Prueba_buzzer\main.asm(1): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
                                  
-                                 // Universidad Del Valle de Guatemala
+                                 .include "M328PDEF.inc" // Nombres de registros específicos del ATmega328P
                                  
                                  ;***** Created: 2011-02-09 12:03 ******* Source: ATmega328P.xml **********
                                  ;*************************************************************************
@@ -987,12 +987,6 @@ C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_r
                                  
                                  ; ***** END OF FILE ******************************************************
                                  
-                                 // Ingeniería Mecatrónica
-                                 // Programación de Microcontroladores
-                                 // Proyecto Assembler: Reloj
-                                 // Caleb Portillo - 24419
-                                 
-                                 .include "M328PDEF.inc" // Nombres de registros específicos del ATmega328P
                                  
                                  ;***** Created: 2011-02-09 12:03 ******* Source: ATmega328P.xml **********
                                  ;*************************************************************************
@@ -1037,65 +1031,16 @@ C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_r
                                  
                                  ; ***** END OF FILE ******************************************************
                                  
-                                 // *********************************************************************************************************************************************//
-                                 // DATA SEGMENT: Registros que se almacenan en la SRAM
-                                 .dseg 
-000100                           botones: .byte 1 // Para guardar el estado de los botones
-000101                           disp_activo: .byte 1 // Para saber qué display está encendido en este instante
-000102                           disp_config: .byte 1 // Para saber qué display estamos configurando
+                                 .dseg
+000100                           cnt_LEDR: .byte 1
                                  
-                                 // Códigos HEX de cada display
-000103                           disp_i1: .byte 1 // Display izquierda 1
-000104                           disp_i2: .byte 1 // Display izquierda 2
-000105                           disp_d1: .byte 1 // Display derecha 1
-000106                           disp_d2: .byte 1 // Display derecha 2
-                                 
-                                 // Contadores generales para cada medida de tiempo (unidades + decenas)
-000107                           cnt_LEDR: .byte 1
-000108                           cnt_horas: .byte 1
-000109                           cnt_dias: .byte 1
-00010a                           cnt_meses: .byte 1
-                                 
-                                 // Contadores de unidades y decenas para cada medida de tiempo
-00010b                           u_minutos: .byte 1
-00010c                           d_minutos: .byte 1
-00010d                           u_horas: .byte 1
-00010e                           d_horas: .byte 1
-00010f                           u_dias: .byte 1
-000110                           d_dias: .byte 1
-000111                           u_meses: .byte 1
-000112                           d_meses: .byte 1
-                                 
-                                 // Contadores para alarma
-000113                           al_u_minutos: .byte 1
-000114                           al_d_minutos: .byte 1
-000115                           al_u_horas: .byte 1
-000116                           al_d_horas: .byte 1
-                                 
-000117                           config: .byte 1 // Bandera de configuración [0xFF es config activada]
-000118                           modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es modo hora, 0x55 es config alarma]
-                                 
-                                 // *********************************************************************************************************************************************//
-                                 // CODE SEGMENT: Comienza el programa
                                  .cseg
                                  .org 0x00 // O ".org SRAM_START"
 000000 c020                        	RJMP start
-                                 
-                                 .org PCI0addr // Interrupción para pin change en PORTB
-000006 c1b5                      	RJMP ISR_PCINT0
-                                 
-                                 .org OVF2addr // Interrupción por timer2
-000012 c265                      	RJMP ISR_timer2
-                                 
-                                 .org OVF1addr // Interrupción por timer1
-00001a c294                      	RJMP ISR_timer1
-                                 
-                                 .org OVF0addr // Interrupción por timer0
-000020 c2a9                      	RJMP ISR_timer0
                                  	
-                                 // *********************************************************************************************************************************************//
-                                 // Configuraciones generales del microcontrolador
-                                 
+                                 .org OVF0addr // Interrupción por timer0
+000020 c01c                      	RJMP ISR_timer0	
+                                 	
                                  	start:
 000021 94f8                      	CLI
                                  
@@ -1112,778 +1057,56 @@ C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_r
                                  		//LDI R16, 0x00 // Borrar
 00002a 9300 0061                 		STS CLKPR, R16
                                  
-                                 	// DESHABILITAR ADC (Si no, no se puede usar PORTC como pines digitales (Se les conectaron LEDs y transistores)
-00002c 9100 007a                 		LDS r16, ADCSRA
-00002e 770f                      		CBR r16, (1 << ADEN)
-00002f 9300 007a                 		STS ADCSRA, r16
-                                 
-                                 	// Deshabilitar UART (Para usar PD0 y PD1, que son Tx y Rx) (Se les conectaron pines del display)
-000031 e000                      		LDI R16, 0x00
-000032 9300 00c1                 		STS UCSR0B, R16
-                                 
                                  	// Timer0 (Parpadeo de LEDs rojas)
-000034 e005                      		LDI R16, (1<<CS02)|(1<<CS00) // Prescaler de 1024
-000035 bd05                      		OUT TCCR0B, R16
-000036 e00c                      		LDI R16, 12 // Empezamos a contar en 12
-000037 bd06                      		OUT TCNT0, R16
-000038 e001                      		LDI R16, (1<<TOIE0) // Enable de la interrupción Timer/Counter0
-000039 9300 006e                 		STS TIMSK0, R16
-                                 
-                                 	// Timer1 (contador de minutos)
-00003b e000                      		LDI R16, 0x00
-00003c 9300 0080                 		STS TCCR1A, R16 // Timer1 en modo normal
-00003e e005                      		LDI R16, (1<<CS12)|(1<<CS10)
-                                 		//LDI R16, (1<<CS11) // Borrar
-00003f 9300 0081                 		STS TCCR1B, R16 // Prescaler de 1024
-000041 e10b                      		LDI R16, 0x1B
-000042 9300 0085                 		STS TCNT1H, R16 // Valor inicial H para 60s
-000044 e10e                      		LDI R16, 0x1E
-000045 9300 0084                 		STS TCNT1L, R16 // Valor inicial L para 60s
-000047 e001                      		LDI R16, (1<<TOIE1)
-000048 9300 006f                 		STS TIMSK1, R16 // Enable de la interrupción por overflow
-                                 
-                                 	// Timer2 (para alternar displays de 7 segmentos)
-00004a e000                      		LDI R16, 0x00
-00004b 9300 00b0                 		STS TCCR2A, R16 // Timer2 en modo normal
-00004d e006                      		LDI R16, (1<<CS22)|(1<<CS21) // Prescaler de 256
-00004e 9300 00b1                 		STS TCCR2B, R16
-000050 ef0a                      		LDI R16, 250 // Empezar a contar desde 250
-000051 9300 00b2                 		STS TCNT2, R16
-000053 e001                      		LDI R16, (1<<TOIE2) // Enable del overflow interrupt
-000054 9300 0070                 		STS TIMSK2, R16
-                                 
-                                 	// Interrupciones por pin change
-000056 e001                      		LDI R16, (1<<PCIE0) // Enable del PORTB
-000057 9300 0068                 		STS PCICR, R16
-000059 e10f                      		LDI R16, (1<<PCINT0)|(1<<PCINT1)|(1<<PCINT2)|(1<<PCINT3)|(1<<PCINT4)  // Selección de los bits PB4-0 para interrupciones
-00005a 9300 006b                 		STS PCMSK0, R16
-                                 
-                                 	// Puertos I/O
-00005c e200                      		LDI R16, 0x20 // PB4-0 tiene los botones, PB5 es para las LEDs rojas
-00005d b904                      		OUT DDRB, R16
-00005e e30f                      		LDI R16, 0x3F // PC0 es la LED azul, PC1 es la LED verde, PC5-2 tiene los ENABLE de los displays
-00005f b907                      		OUT DDRC, R16
-000060 ef0f                      		LDI R16, 0xFF // Display de 7 segmentos, todo OUTPUT
-000061 b90a                      		OUT DDRD, R16
-                                 
-                                 	// Configuración de LEDs y botones
-000062 e10f                      		LDI R16, 0x1F // Todos los botones con resistencia Pull-Up y LEDs R apagadas
-000063 b905                      		OUT PORTB, R16
-000064 e30c                      		LDI R16, 0x3C // LEDs A/V apagadas y todos los displays enabled
-000065 b908                      		OUT PORTC, R16
-000066 e000                      		LDI R16, 0x00 // Displays apagados
-000067 b90b                      		OUT PORTD, R16
-                                 
-                                 	// Configuración del vector z
-000068 e0f5                      		LDI ZH, HIGH(Table_7seg<<1)
-000069 ede6                      		LDI ZL, LOW(Table_7seg<<1)
-                                 
-                                 	// Inicializar registros a utilizar
-                                 
-                                 		// Registros en la SRAM
-00006a e10f                      		LDI R16, 0x1F // Estado inicial de los botones (arriba en Pull-Up)
-00006b 9300 0100                 		STS botones, R16
-                                 
-00006d 9104                      		LPM R16, Z // Estado inicial de los displays (todos en 0)
-00006e 9300 0103                 		STS disp_i1, R16
-000070 9300 0104                 		STS disp_i2, R16
-000072 9300 0105                 		STS disp_d1, R16
-000074 9300 0106                 		STS disp_d2, R16
-                                 
-000076 2700                      		CLR R16 // Los demás registros comienzan en 0
+00002c e005                      		LDI R16, (1<<CS02)|(1<<CS00) // Prescaler de 1024
+00002d bd05                      		OUT TCCR0B, R16
+00002e e00c                      		LDI R16, 12 // Empezamos a contar en 12
+00002f bd06                      		OUT TCNT0, R16
+000030 e001                      		LDI R16, (1<<TOIE0) // Enable de la interrupción Timer/Counter0
+000031 9300 006e                 		STS TIMSK0, R16
                                  		
-000077 9300 0117                 		STS config, R16
-000079 9300 0118                 		STS modo, R16
-00007b 9300 0101                 		STS disp_activo, R16
-00007d 9300 0102                 		STS disp_config, R16
+000033 e005                      		LDI R16, PORTB5
+000034 b904                      		OUT DDRB, R16 // Salida
+000035 e000                      		LDI R16, 0x00
+000036 b905                      		OUT PORTB, R16
                                  		
-00007f 9300 0107                 		STS cnt_LEDR, R16
-000081 9300 0108                 		STS cnt_horas, R16
-                                 
-000083 9300 010b                 		STS u_minutos, R16
-000085 9300 010c                 		STS d_minutos, R16
-000087 9300 010d                 		STS u_horas, R16
-000089 9300 010e                 		STS d_horas, R16
-00008b 9300 0110                 		STS d_dias, R16
-00008d 9300 0112                 		STS d_meses, R16
-                                 
-00008f e001                      		LDI R16, 0x01 // El modo fecha empieza desde el 1 de enero
-000090 9300 010f                 		STS u_dias, R16
-000092 9300 0111                 		STS u_meses, R16
-000094 9300 0109                 		STS cnt_dias, R16
-000096 9300 010a                 		STS cnt_meses, R16
-                                 
-000098 e000                      		LDI R16, 0x00 // La alarma está programada por default para las 7 de la mañana
-000099 9300 0113                 		STS al_u_minutos, R16
-00009b 9300 0114                 		STS	al_d_minutos, R16
-00009d 9300 0116                 		STS al_d_horas, R16
-00009f e007                      		LDI R16, 0x07
-0000a0 9300 0115                 		STS al_u_horas, R16
-                                 
-                                 		// Registros de propósito general
-0000a2 2700                      		CLR R16
-0000a3 2711                      		CLR R17
-0000a4 2722                      		CLR R18
-0000a5 2733                      		CLR R19
-0000a6 2744                      		CLR R20
-0000a7 2755                      		CLR R21
-0000a8 2766                      		CLR R22
-0000a9 2777                      		CLR R23
-0000aa 2788                      		CLR R24
-                                 
-                                 		// Estado incial de los displays (solo durante la carga inicial)
-0000ab 9104                      		LPM R16, Z // Guardar el número actual (0 en el display)
-0000ac b90b                      		OUT PORTD, R16 // Mostrar el número 0
-                                 
-0000ad 9478                      		SEI // Habilitar interrupciones globales
-                                 
-                                 // *********************************************************************************************************************************************//
-                                 // Programa principal
-                                 
-                                 // Subrutinas para mostrar fecha y hora según el modo
-                                 
-                                 	Verificar_MODO:
-0000ae 9100 0118                 		LDS R16, modo
-0000b0 3f0f                      		CPI R16, 0xFF
-0000b1 f409                      		BRNE HORA
-0000b2 c023                      		RJMP FECHA
-                                 
-                                 	HORA:
-                                 		// Unidades de minutos
-0000b3 e0f5                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
-0000b4 ede6                      		LDI ZL, LOW(Table_7seg<<1)
-0000b5 9100 010b                 		LDS R16, u_minutos
-0000b7 0fe0                      		ADD ZL, R16
-0000b8 9114                      		LPM R17, Z
-0000b9 9310 0106                 		STS disp_d2, R17
-                                 
-                                 		// Decenas de minutos
-0000bb e0f5                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
-0000bc ede6                      		LDI ZL, LOW(Table_7seg<<1)
-0000bd 9100 010c                 		LDS R16, d_minutos
-0000bf 0fe0                      		ADD ZL, R16
-0000c0 9114                      		LPM R17, Z
-0000c1 9310 0105                 		STS disp_d1, R17
-                                 
-                                 		// Unidades de horas
-0000c3 e0f5                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
-0000c4 ede6                      		LDI ZL, LOW(Table_7seg<<1)
-0000c5 9100 010d                 		LDS R16, u_horas
-0000c7 0fe0                      		ADD ZL, R16
-0000c8 9114                      		LPM R17, Z
-0000c9 9310 0104                 		STS disp_i2, R17
-                                 
-                                 		// Decenas de horas
-0000cb e0f5                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
-0000cc ede6                      		LDI ZL, LOW(Table_7seg<<1)
-0000cd 9100 010e                 		LDS R16, d_horas
-0000cf 0fe0                      		ADD ZL, R16
-0000d0 9114                      		LPM R17, Z
-0000d1 9310 0103                 		STS disp_i1, R17
-                                 
-0000d3 9a40                      		SBI PORTC, PORTC0
-0000d4 9841                      		CBI PORTC, PORTC1
-0000d5 c023                      		RJMP Verificar_OVF
-                                 
-                                 	FECHA:
-                                 		// Unidades de dias
-0000d6 e0f5                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
-0000d7 ede6                      		LDI ZL, LOW(Table_7seg<<1)
-0000d8 9100 010f                 		LDS R16, u_dias
-0000da 0fe0                      		ADD ZL, R16
-0000db 9114                      		LPM R17, Z
-0000dc 9310 0104                 		STS disp_i2, R17
-                                 
-                                 		// Decenas de dias
-0000de e0f5                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
-0000df ede6                      		LDI ZL, LOW(Table_7seg<<1)
-0000e0 9100 0110                 		LDS R16, d_dias
-0000e2 0fe0                      		ADD ZL, R16
-0000e3 9114                      		LPM R17, Z
-0000e4 9310 0103                 		STS disp_i1, R17
-                                 
-                                 		// Unidades de meses
-0000e6 e0f5                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
-0000e7 ede6                      		LDI ZL, LOW(Table_7seg<<1)
-0000e8 9100 0111                 		LDS R16, u_meses
-0000ea 0fe0                      		ADD ZL, R16
-0000eb 9114                      		LPM R17, Z
-0000ec 9310 0106                 		STS disp_d2, R17
-                                 
-                                 		// Decenas de meses
-0000ee e0f5                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
-0000ef ede6                      		LDI ZL, LOW(Table_7seg<<1)
-0000f0 9100 0112                 		LDS R16, d_meses
-0000f2 0fe0                      		ADD ZL, R16
-0000f3 9114                      		LPM R17, Z
-0000f4 9310 0105                 		STS disp_d1, R17
+000037 2700                      		CLR R16
+000038 9300 0100                 		STS cnt_LEDR, R16
+00003a 2711                      		CLR R17
+00003b 2722                      		CLR R18
                                  		
-0000f6 9a41                      		SBI PORTC, PORTC1
-0000f7 9840                      		CBI PORTC, PORTC0
-0000f8 c000                      		RJMP Verificar_OVF
-                                 
-                                 // Subrutinas de overflow para los contadores
-                                 
-                                 	Verificar_OVF:
-0000f9 9110 010b                 		LDS R17, u_minutos // Leemos las unidades de minutos que han pasado
-0000fb 301a                      		CPI R17, 0x0A // Si ya pasaron 10 u_minutos, hacemos overflow a decenas de minutos
-0000fc f5c0                      		BRSH INC_d_minutos
-                                 
-0000fd 9120 010c                 		LDS R18, d_minutos // Leemos las decenas de minutos que han pasado
-0000ff 3026                      		CPI R18, 0x06 // Si ya pasaron 60 minutos, hacemos overflow a unidades de hora
-000100 f008                      		BRLO PC+2
-000101 c03e                      		RJMP INC_u_horas
+                                 	MAIN:
+00003c cfff                      		RJMP MAIN
                                  		
-000102 9130 010d                 		LDS R19, u_horas // Leemos las unidades de horas que han pasado
-000104 303a                      		CPI R19, 0x0A // Si ya pasaron 10 horas, hacemos overflow a decenas de hora
-000105 f008                      		BRLO PC+2
-000106 c04b                      		RJMP INC_d_horas
-                                 		
-000107 9110 0108                 		LDS R17, cnt_horas // Leemos las horas totales que han pasado (0 a 24)
-000109 3118                      		CPI R17, 24 // Si ya pasaron 24 horas, incrementamos el dia
-00010a f008                      		BRLO PC+2
-00010b c04f                      		RJMP INC_u_dias_A
-                                 		
-00010c 9150 010f                 		LDS R21, u_dias // Leemos las unidades de días que han pasado
-00010e 305a                      		CPI R21, 0x0A // Si ya pasaron 10, hacemos overflow a decenas de días
-00010f f008                      		BRLO PC+2
-000110 c069                      		RJMP INC_d_dias
-                                 
-000111 9160 0110                 		LDS R22, d_dias
-000113 3064                      		CPI R22, 0x04 // Impedimos que se pueda cargar más de 4 decenas de días en el modo config
-000114 f419                      		BRNE Verificar_OVF_cnt_dias
-000115 2766                      		CLR R22
-000116 9360 0110                 		STS d_dias, R22
-                                 		
-                                 		Verificar_OVF_cnt_dias:
-000118 9110 0109                 		LDS R17, cnt_dias // Cargamos el contador actual de dias
-                                 
-00011a 9120 010a                 		LDS R18, cnt_meses // Tenemos que verificar si estamos en febrero, que es un caso especial
-00011c 3022                      		CPI R18, 2
-00011d f419                      		BRNE PC+4 // Si no, saltamos al siguiente bloque
-00011e 311d                      		CPI R17, 29
-00011f f008                      		BRLO PC+2 // Si estamos en un día mayor o igual a 29, nos vamos a incrementar meses
-000120 c072                      		RJMP INC_u_meses
-                                 
-000121 3210                      		CPI R17, 32 // Si ya pasaron 31 días, toca incrementar el mes
-000122 f008                      		BRLO PC+2
-000123 c06f                      		RJMP INC_u_meses
-000124 311f                      		CPI R17, 31 // Si ya pasaron 30 días, verificamos en qué mes estamos
-000125 f008                      		BRLO PC+2
-000126 c061                      		RJMP V_30_DIAS
-000127 311d                      		CPI R17, 29 // Si ya pasaron 28 días, verificamos si estamos en febrero
-000128 f008                      		BRLO PC+2
-000129 c059                      		RJMP V_28_DIAS
-                                 
-00012a 9170 0111                 		LDS R23, u_meses
-00012c 307a                      		CPI R23, 0x0A // Si se incrementa de 9 a 10 meses, debemos hacer overflow en unidades de meses
-00012d f008                      		BRLO PC+2
-00012e c07b                      		RJMP INC_d_meses
-                                 		
-00012f 9120 010a                 		LDS R18, cnt_meses // Revisamos si ya pasaron 12 meses para reiniciar
-000131 302d                      		CPI R18, 13
-000132 f008                      		BRLO PC+2
-000133 c07f                      		RJMP Reinicio_reloj
-                                 
-000134 cf79                      		RJMP Verificar_MODO
-                                 
-                                 	INC_d_minutos:
-000135 2711                      		CLR R17
-000136 9310 010b                 		STS u_minutos, R17 // Reiniciamos u_minutos, pasa de 9 a 0
-                                 
-000138 9120 010c                 		LDS R18, d_minutos // Leemos las decenas de minutos que han pasado
-00013a 9523                      		INC R18 // Aumentamos las decenas de minutos
-00013b 3026                      		CPI R18, 0x06 // Si ya pasaron 60 minutos, hacemos overflow a unidades de hora
-00013c f418                      		BRSH INC_u_horas
-                                 
-00013d 9320 010c                 		STS d_minutos, R18
-00013f cf6e                      		RJMP Verificar_MODO
-                                 
-                                 	INC_u_horas:
-000140 2722                      		CLR R18
-000141 9320 010c                 		STS d_minutos, R18 // Reiniciamos d_minutos, pasa de 5 a 0 (59 a 00 en los display d)
-                                 
-000143 9110 0108                 		LDS R17, cnt_horas // Leemos las horas totales que han pasado (0 a 24)
-000145 9513                      		INC R17 // Aumentamos 1
-000146 3118                      		CPI R17, 24 // Si ya pasaron 24 horas, incrementamos el dia
-000147 f498                      		BRSH INC_u_dias_A
-                                 
-000148 9310 0108                 		STS cnt_horas, R17 // Guardamos el nuevo valor de horas generales
-                                 
-00014a 9130 010d                 		LDS R19, u_horas // Leemos las unidades de horas que han pasado
-00014c 9533                      		INC R19 // Incrementamos
-00014d 303a                      		CPI R19, 0x0A // Si ya pasaron 10 horas, hacemos overflow a decenas de hora
-00014e f418                      		BRSH INC_d_horas
-                                 
-00014f 9330 010d                 		STS u_horas, R19
-000151 cf5c                      		RJMP Verificar_MODO
-                                 
-                                 	INC_d_horas: // Si entramos a esta subrutina, es porque no está ocurriendo incremento de día
-000152 2733                      		CLR R19
-000153 9330 010d                 		STS u_horas, R19 // Reiniciamos unidades de horas
-                                 
-000155 9140 010e                 		LDS R20, d_horas // Leemos las decenas de horas que han pasado
-000157 9543                      		INC R20
-000158 9340 010e                 		STS d_horas, R20 // Guardamos el nuevo valor
-00015a cf53                      		RJMP Verificar_MODO
-                                 
-                                 	INC_u_dias_A:
-00015b 2700                      		CLR R16 // Reiniciamos los contadores de horas
-00015c 9300 0108                 		STS cnt_horas, R16
-00015e 9300 010d                 		STS u_horas, R16
-000160 9300 010e                 		STS d_horas, R16		
-                                 
-000162 9110 0109                 		LDS R17, cnt_dias // Cargamos el día actual e incrementamos 1
-000164 9513                      		INC R17
-                                 
-000165 3210                      		CPI R17, 32 // Si ya pasaron 31 días, toca incrementar el mes
-000166 f560                      		BRSH INC_u_meses
-                                 		
-000167 311f                      		CPI R17, 31 // Si ya pasaron 30 días, verificamos en qué mes estamos
-000168 f4f8                      		BRSH V_30_DIAS
-                                 		
-000169 311d                      		CPI R17, 29 // Si ya pasaron 28 días, verificamos si estamos en febrero
-00016a f4c0                      		BRSH V_28_DIAS
-                                 
-                                 	INC_u_dias_B:
-00016b 9310 0109                 		STS cnt_dias, R17 // Si no se activa ninguna de esas subrutinas, guardamos el valor nuevo de cnt_dias
-                                 
-00016d 9100 0117                 		LDS R16, config
-00016f 3f0f                      		CPI R16, 0xFF
-000170 f409                      		BRNE PC+2
-000171 cf3c                      		RJMP Verificar_modo
-                                 
-000172 9150 010f                 		LDS R21, u_dias
-000174 9553                      		INC R21
-000175 305a                      		CPI R21, 0x0A
-000176 f418                      		BRSH INC_d_dias
-                                 
-000177 9350 010f                 		STS u_dias, R21
-000179 cf34                      		RJMP Verificar_MODO
-                                 
-                                 	INC_d_dias:
-00017a 2755                      		CLR R21
-00017b 9350 010f                 		STS u_dias, R21
-                                 
-00017d 9160 0110                 		LDS R22, d_dias
-00017f 9563                      		INC R22
-000180 9360 0110                 		STS d_dias, R22
-000182 cf2b                      		RJMP Verificar_MODO
-                                 
-                                 	V_28_DIAS: // Si estamos en febrero, el mes cambia después de 28 días
-000183 9100 010a                 		LDS R16, cnt_meses
-000185 3002                      		CPI R16, 2
-000186 f721                      		BRNE INC_u_dias_B // Si no estamos en febrero, regresamos al flujo de incremento normal
-000187 c00b                      		RJMP INC_u_meses
-                                 
-                                 	V_30_DIAS:
-000188 9100 010a                 		LDS R16, cnt_meses
-                                 
-00018a 3004                      		CPI R16, 4 // Estamos en abril?
-00018b f039                      		BREQ INC_u_meses
-                                 
-00018c 3006                      		CPI R16, 6 // Estamos en junio?
-00018d f029                      		BREQ INC_u_meses
-                                 
-00018e 3009                      		CPI R16, 9 // Estamos en septiembre?
-00018f f019                      		BREQ INC_u_meses
-                                 
-000190 300b                      		CPI R16, 11 // Estamos en noviembre?
-000191 f009                      		BREQ INC_u_meses
-                                 
-000192 cfd8                      		RJMP INC_u_dias_B
-                                 
-                                 	INC_u_meses:
-000193 e011                      		LDI R17, 0x01 // Los contadores de días vuelven a empezar desde 01
-000194 9310 0109                 		STS cnt_dias, R17
-000196 9310 010f                 		STS u_dias, R17
-000198 2711                      		CLR R17
-000199 9310 0110                 		STS d_dias, R17
-                                 
-00019b 9120 010a                 		LDS R18, cnt_meses
-00019d 9523                      		INC R18
-00019e 302d                      		CPI R18, 13
-00019f f498                      		BRSH Reinicio_reloj
-0001a0 9320 010a                 		STS cnt_meses, R18
-                                 
-0001a2 9170 0111                 		LDS R23, u_meses
-0001a4 9573                      		INC R23
-0001a5 307a                      		CPI R23, 0x0A
-0001a6 f418                      		BRSH INC_d_meses
-                                 
-0001a7 9370 0111                 		STS u_meses, R23
-0001a9 cf04                      		RJMP Verificar_MODO
-                                 
-                                 	INC_d_meses:
-0001aa 2777                      		CLR R23
-0001ab 9370 0111                 		STS u_meses, R23
-                                 
-0001ad 9180 0112                 		LDS R24, d_meses
-0001af 9583                      		INC R24
-0001b0 9380 0112                 		STS d_meses, R24
-0001b2 cefb                      		RJMP Verificar_MODO
-                                 
-                                 	Reinicio_reloj:
-0001b3 e041                      		LDI R20, 0x01
-0001b4 9340 010a                 		STS cnt_meses, R20
-0001b6 9340 0111                 		STS u_meses, R20
-0001b8 2744                      		CLR R20
-0001b9 9340 0112                 		STS d_meses, R20
-0001bb cef2                      		RJMP Verificar_MODO
-                                 
-                                 // *********************************************************************************************************************************************//
-                                 // Subrutinas de programa
-                                 
-                                 // *********************************************************************************************************************************************//
-                                 // Subrutinas de interrupción
-                                 
-                                 	// Interrupción para pin change en PORTB
-                                 	ISR_PCINT0: 
-0001bc 930f                      		PUSH R16
-0001bd b70f                      		IN   R16, SREG
-0001be 930f                      		PUSH R16
-0001bf 931f                      		PUSH R17
-0001c0 932f                      		PUSH R18
-0001c1 933f                      		PUSH R19
-0001c2 934f                      		PUSH R20
-0001c3 935f                      		PUSH R21
-0001c4 936f                      		PUSH R22
-                                 
-0001c5 b113                      		IN R17, PINB // Lectura del estado actual de los botones
-0001c6 731f                      		ANDI R17, 0x3F // Máscara para solo dejar PB5-0 con valor (no editamos el LED rojo)
-                                 
-                                 		// Verificamos los botones 4-1 (Si actualmente son 1 [no presionado], se ignora la subrutina correspondiente)
-0001c7 9b19                      		SBIS PINB, 1
-0001c8 c017                      		RJMP BOTON_1
-0001c9 9b1a                      		SBIS PINB, 2
-0001ca c086                      		RJMP BOTON_2
-0001cb 9b1b                      		SBIS PINB, 3
-0001cc c084                      		RJMP BOTON_3
-0001cd 9b1c                      		SBIS PINB, 4
-0001ce c08e                      		RJMP BOTON_4
-                                 
-                                 		// Verificamos el botón 0 (config)
-0001cf 2f21                      		MOV R18, R17 // Copia del estado actual de los botones
-0001d0 7021                      		ANDI R18, 0x01 // Aislamos bit 0
-0001d1 3020                      		CPI R18, 0x00 // Si es igual a 0, el botón se está presionando y CONFIG debe ser 0xFF
-0001d2 f049                      		BREQ BOTON_0
-                                 
-0001d3 e021                      		LDI R18, 0x01 // Cargamos 1 en R18
-0001d4 2733                      		CLR R19 // Cargamos 0 en R19
-0001d5 9100 0100                 		LDS R16, botones // Cargamos el estado anterior de los botones
-0001d7 7001                      		ANDI R16, 0x01 // Aislamos bit 0
-0001d8 1302                      		CPSE R16, R18 // Si son iguales (BOTON_0 = 1), el botón estaba suelto, así que no hubo flanco de subida y se ignora la siguiente línea
-0001d9 9330 0117                 		STS config, R19 // Si no son iguales (BOTON_0 = 0), el botón estaba presionado y hubo flanco de subida, se resetea la bandera de config
-                                 
-0001db c090                      		RJMP EXIT_ISR_PCINT0
-                                 
-                                 	BOTON_0:
-0001dc ef0f                      		LDI R16, 0xFF
-0001dd 9300 0117                 		STS config, R16 // Activamos configuración: config = 0xFF
-0001df c08c                      		RJMP EXIT_ISR_PCINT0
-                                 
-                                 	BOTON_1:
-0001e0 9100 0117                 		LDS R16, config
-0001e2 3000                      		CPI R16, 0x00
-0001e3 f409                      		BRNE ACCION_B1
-0001e4 c087                      		RJMP EXIT_ISR_PCINT0 // Si no estamos en configuración, no tiene efecto la pulsación
-                                 
-                                 		ACCION_B1:
-0001e5 9100 0118                 		LDS R16, modo
-0001e7 3000                      		CPI R16, 0x00
-0001e8 f011                      		BREQ B1_HORA // Branch si estamos en modo hora
-0001e9 3f0f                      		CPI R16, 0xFF
-0001ea f169                      		BREQ B1_FECHA // Branch si estamos en modo fecha
-                                 
-                                 		B1_HORA:
-0001eb 9110 0102                 			LDS R17, disp_config // Incrementamos el valor del display seleccionado (cambia con el B4)
-                                 			
-0001ed 3010                      			CPI R17, 0x00
-0001ee f031                      			BREQ INC_CONFIG_U_MINUTOS // disp_config = 0 incrementa u_minutos
-0001ef 3011                      			CPI R17, 0x01
-0001f0 f051                      			BREQ INC_CONFIG_D_MINUTOS // disp_config = 1 incrementa d_minutos
-0001f1 3012                      			CPI R17, 0x02
-0001f2 f071                      			BREQ INC_CONFIG_U_HORAS // disp_config = 2 incrementa u_horas
-0001f3 3013                      			CPI R17, 0x03
-0001f4 f4b8                      			BRSH INC_CONFIG_D_HORAS // disp_config = 3 incrementa d_horas
-                                 
-                                 			INC_CONFIG_U_MINUTOS: // Aumentamos 1 minuto
-0001f5 9130 010b                 				LDS R19, u_minutos
-0001f7 9533                      				INC R19
-0001f8 9330 010b                 				STS u_minutos, R19
-0001fa c071                      				RJMP EXIT_ISR_PCINT0
-                                 
-                                 			INC_CONFIG_D_MINUTOS: // Aumentamos 10 minutos
-0001fb 9130 010c                 				LDS R19, d_minutos
-0001fd 9533                      				INC R19
-0001fe 9330 010c                 				STS d_minutos, R19
-000200 c06b                      				RJMP EXIT_ISR_PCINT0
-                                 
-                                 			INC_CONFIG_U_HORAS: // Aumentamos 1 hora (en contador general y en el de unidades)
-000201 9130 010d                 				LDS R19, u_horas 
-000203 9533                      				INC R19
-000204 9330 010d                 				STS u_horas, R19
-                                 
-000206 9140 0108                 				LDS R20, cnt_horas 
-000208 9543                      				INC R20
-000209 9340 0108                 				STS cnt_horas, R20
-00020b c060                      				RJMP EXIT_ISR_PCINT0
-                                 
-                                 			INC_CONFIG_D_HORAS: // Aumentamos 10 horas en contador general y 1 en el de decenas
-00020c 9130 010e                 				LDS R19, d_horas 
-00020e 9533                      				INC R19
-00020f 9330 010e                 				STS d_horas, R19
-                                 
-000211 9140 0108                 				LDS R20, cnt_horas
-000213 e05a                      				LDI R21, 0x0A 
-000214 0f45                      				ADD R20, R21
-000215 9340 0108                 				STS cnt_horas, R20
-000217 c054                      				RJMP EXIT_ISR_PCINT0
-                                 
-                                 		B1_FECHA:
-000218 9110 0102                 			LDS R17, disp_config // Incrementamos el valor del display seleccionado (cambia con el B4)
-                                 			
-00021a 3010                      			CPI R17, 0x00
-00021b f031                      			BREQ INC_CONFIG_U_DIAS // disp_config = 0 incrementa u_dias
-00021c 3011                      			CPI R17, 0x01
-00021d f079                      			BREQ INC_CONFIG_D_DIAS // disp_config = 1 incrementa d_dias
-00021e 3012                      			CPI R17, 0x02
-00021f f0c9                      			BREQ INC_CONFIG_U_MESES // disp_config = 2 incrementa u_meses
-000220 3013                      			CPI R17, 0x03
-000221 f510                      			BRSH INC_CONFIG_D_MESES // disp_config = 3 incrementa d_meses
-                                 
-                                 			INC_CONFIG_U_DIAS: // Aumentamos 1 dia (en contador general y en el de unidades)
-000222 9130 010f                 				LDS R19, u_dias
-000224 9533                      				INC R19
-000225 9330 010f                 				STS u_dias, R19
-                                 				
-000227 9140 0109                 				LDS R20, cnt_dias 
-000229 9543                      				INC R20
-00022a 9340 0109                 				STS cnt_dias, R20
-00022c c03f                      				RJMP EXIT_ISR_PCINT0
-                                 
-                                 			INC_CONFIG_D_DIAS: // Aumentamos 10 dias en el contador general y 1 en el de decenas
-00022d 9130 0110                 				LDS R19, d_dias
-00022f 9533                      				INC R19
-000230 9330 0110                 				STS d_dias, R19
-                                 				
-000232 9140 0109                 				LDS R20, cnt_dias
-000234 e05a                      				LDI R21, 0x0A 
-000235 0f45                      				ADD R20, R21
-000236 9340 0109                 				STS cnt_dias, R20
-000238 c033                      				RJMP EXIT_ISR_PCINT0
-                                 
-                                 			INC_CONFIG_U_MESES: // Aumentamos 1 mes (en contador general y en el de unidades)
-000239 9130 0111                 				LDS R19, u_meses 
-00023b 9533                      				INC R19
-00023c 9330 0111                 				STS u_meses, R19
-                                 
-00023e 9140 010a                 				LDS R20, cnt_meses
-000240 9543                      				INC R20
-000241 9340 010a                 				STS cnt_meses, R20
-000243 c028                      				RJMP EXIT_ISR_PCINT0
-                                 
-                                 			INC_CONFIG_D_MESES: // Aumentamos 10 meses en el contador general y 1 en el de decenas
-000244 9130 0112                 				LDS R19, d_meses
-000246 9533                      				INC R19
-000247 9330 0112                 				STS d_meses, R19
-                                 
-000249 9140 010a                 				LDS R20, cnt_meses
-00024b e05a                      				LDI R21, 0x0A 
-00024c 0f45                      				ADD R20, R21
-00024d 9340 010a                 				STS cnt_meses, R20
-00024f c01c                      				RJMP EXIT_ISR_PCINT0
-                                 
-000250 c01b                      		RJMP EXIT_ISR_PCINT0
-                                 		
-                                 	BOTON_2: // Botón de decremento
-                                 
-                                 
-                                 
-                                 	BOTON_3: // Botón de cambio de modo
-000251 9130 0118                 		LDS R19, modo
-000253 3030                      		CPI R19, 0x00
-000254 f421                      		BRNE BOTON_3A
-000255 ef3f                      		LDI R19, 0xFF
-000256 9330 0118                 		STS modo, R19
-000258 c013                      		RJMP EXIT_ISR_PCINT0
-                                 
-                                 		BOTON_3A: // Reset de modo
-000259 e030                      			LDI R19, 0x00
-00025a 9330 0118                 			STS modo, R19
-00025c c00f                      			RJMP EXIT_ISR_PCINT0
-                                 	
-                                 	BOTON_4: // Botón para cambiar de display que se está configurando
-00025d 9150 0117                 		LDS R21, config // revisamos si estamos en CONFIG desactivada
-00025f 3050                      		CPI R21, 0x00
-000260 f059                      		BREQ EXIT_ISR_PCINT0 // Si es así, nos vamos
-                                 
-000261 9160 0102                 		LDS R22, disp_config // Qué display estamos configurando?
-000263 9563                      		INC R22 // Pasamos al siguiente display
-000264 9360 0102                 		STS disp_config, R22 // Guardamos el nuevo valor
-                                 	
-000266 3064                      		CPI R22, 0x04 
-000267 f421                      		BRNE EXIT_ISR_PCINT0
-000268 2766                      		CLR R22
-000269 9360 0102                 		STS disp_config, R22 // Si pasamos de 3, regresamos a 0
-00026b c000                      		RJMP EXIT_ISR_PCINT0
-                                 
-                                 	EXIT_ISR_PCINT0:
-00026c 9310 0100                 		STS botones, R17 // Guardamos la lectura realizada como nueva lectura de botones
-00026e 916f                      		POP R22
-00026f 915f                      		POP R21
-000270 914f                      		POP R20
-000271 913f                      		POP R19
-000272 912f                      		POP R18
-000273 911f                      		POP R17
-000274 910f                      		POP R16
-000275 bf0f                      		OUT SREG, R16
-000276 910f                      		POP R16
-000277 9518                      		RETI
-                                 
-                                 	// -------------------------------------------------------------------------------------------------------------------------------------------
-                                 	// Interrupción de timer2
-                                 	ISR_timer2:
-000278 930f                      		PUSH R16
-000279 b70f                      		IN   R16, SREG
-00027a 930f                      		PUSH R16
-00027b 931f                      		PUSH R17
-00027c 932f                      		PUSH R18
-00027d 933f                      		PUSH R19
-                                 
-00027e ef0a                      		LDI R16, 250 // Empezamos a contar en 250
-00027f 9300 00b2                 		STS TCNT2, R16
-                                 
-000281 b118                      		IN R17, PORTC
-000282 7013                      		ANDI R17, 0b0000_0011 // No modificamos el valor de las LEDs
-000283 b918                      		OUT PORTC, R17 // Displays apagados por un instante
-                                 
-000284 9120 0101                 		LDS R18, disp_activo
-000286 3020                      		CPI R18, 0x00
-000287 f031                      		BREQ show_dispd2
-000288 3021                      		CPI R18, 0x01
-000289 f051                      		BREQ show_dispd1
-00028a 3022                      		CPI R18, 0x02
-00028b f071                      		BREQ show_dispi2
-00028c 3023                      		CPI R18, 0x03
-00028d f091                      		BREQ show_dispi1
-                                 
-                                 	show_dispd2:
-00028e 9523                      		INC R18
-00028f 9110 0106                 		LDS R17, disp_d2
-000291 b91b                      		OUT PORTD, R17
-000292 9a44                      		SBI PORTC, 4
-000293 c012                      		RJMP RETURN_ISR_timer2
-                                 	
-                                 	show_dispd1:
-000294 9523                      		INC R18
-000295 9110 0105                 		LDS R17, disp_d1
-000297 b91b                      		OUT PORTD, R17
-000298 9a45                      		SBI PORTC, 5
-000299 c00c                      		RJMP RETURN_ISR_timer2
-                                 	
-                                 	show_dispi2:
-00029a 9523                      		INC R18
-00029b 9110 0104                 		LDS R17, disp_i2
-00029d b91b                      		OUT PORTD, R17
-00029e 9a43                      		SBI PORTC, 3
-00029f c006                      		RJMP RETURN_ISR_timer2
-                                 	
-                                 	show_dispi1:
-0002a0 2722                      		CLR R18
-0002a1 9110 0103                 		LDS R17, disp_i1
-0002a3 b91b                      		OUT PORTD, R17
-0002a4 9a42                      		SBI PORTC, 2
-0002a5 c000                      		RJMP RETURN_ISR_timer2
-                                 
-                                 	RETURN_ISR_timer2:
-0002a6 9320 0101                 		STS disp_activo, R18
-0002a8 913f                      		POP R19
-0002a9 912f                      		POP R18
-0002aa 911f                      		POP R17
-0002ab 910f                      		POP R16
-0002ac bf0f                      		OUT SREG, R16
-0002ad 910f                      		POP R16
-0002ae 9518                      		RETI
-                                 
-                                 	// -------------------------------------------------------------------------------------------------------------------------------------------
-                                 	ISR_timer1:
-0002af 930f                      		PUSH R16
-0002b0 b70f                      		IN   R16, SREG
-0002b1 930f                      		PUSH R16
-0002b2 931f                      		PUSH R17
-0002b3 932f                      		PUSH R18
-                                 
-0002b4 e10b                      		LDI R16, 0x1B
-0002b5 9300 0085                 		STS TCNT1H, R16 // Valor inicial H para 60s
-0002b7 e10e                      		LDI R16, 0x1E
-0002b8 9300 0084                 		STS TCNT1L, R16 // Valor inicial L para 60s
-                                 
-0002ba 9100 0117                 		LDS R16, config // Si estamos en modo configuración, no incrementamos el contador de minutos
-0002bc 3f0f                      		CPI R16, 0xFF
-0002bd f031                      		BREQ RETURN_ISR_timer1
-                                 
-0002be 9110 010b                 		LDS R17, u_minutos // Cargamos el valor de unidades de minuto
-0002c0 9513                      		INC R17 // Incrementamos el valor de unidades de minuto
-0002c1 9310 010b                 		STS u_minutos, R17 // Guardamos el nuevo valor
-0002c3 c000                      		RJMP RETURN_ISR_timer1
-                                 
-                                 	RETURN_ISR_timer1:
-0002c4 912f                      		POP R18
-0002c5 911f                      		POP R17
-0002c6 910f                      		POP R16
-0002c7 bf0f                      		OUT SREG, R16
-0002c8 910f                      		POP R16
-0002c9 9518                      		RETI
-                                 
-                                 	// -------------------------------------------------------------------------------------------------------------------------------------------
                                  	// Interrupción por timer0
                                  	ISR_timer0:
-0002ca 930f                      		PUSH R16
-0002cb b70f                      		IN   R16, SREG
-0002cc 930f                      		PUSH R16
-0002cd 931f                      		PUSH R17
-0002ce 932f                      		PUSH R18
-0002cf 933f                      		PUSH R19
-0002d0 934f                      		PUSH R20
+00003d 930f                      		PUSH R16
+00003e b70f                      		IN   R16, SREG
+00003f 930f                      		PUSH R16
+000040 931f                      		PUSH R17
+000041 932f                      		PUSH R18
                                  		
-0002d1 e00c                      		LDI R16, 12 // Empezamos a contar en 12
-0002d2 bd06                      		OUT TCNT0, R16
+000042 e00c                      		LDI R16, 12 // Empezamos a contar en 12
+000043 bd06                      		OUT TCNT0, R16
                                  
-0002d3 9100 0117                 		LDS R16, config
-0002d5 3f0f                      		CPI R16, 0xFF
-0002d6 f061                      		BREQ RETURN_ISR_timer0
-                                 
-0002d7 9110 0107                 		LDS R17, cnt_LEDR
-0002d9 9513                      		INC R17
-0002da 9310 0107                 		STS cnt_LEDR, R17
-0002dc 3012                      		CPI R17, 2
-0002dd f429                      		BRNE RETURN_ISR_timer0
+000044 9110 0100                 		LDS R17, cnt_LEDR
+000046 9513                      		INC R17
+000047 9310 0100                 		STS cnt_LEDR, R17
+000049 3012                      		CPI R17, 2
+00004a f429                      		BRNE RETURN_ISR_timer0
                                  		
-0002de 2711                      		CLR R17
-0002df 9310 0107                 		STS cnt_LEDR, R17
-0002e1 9a1d                      		SBI PINB, PINB5
+00004b 2711                      		CLR R17
+00004c 9310 0100                 		STS cnt_LEDR, R17
+00004e 9a1d                      		SBI PINB, PINB5
                                  
-0002e2 c000                      		RJMP RETURN_ISR_timer0
+00004f c000                      		RJMP RETURN_ISR_timer0
                                  
                                  	RETURN_ISR_timer0:		
-0002e3 914f                      		POP R20
-0002e4 913f                      		POP R19
-0002e5 912f                      		POP R18
-0002e6 911f                      		POP R17
-0002e7 910f                      		POP R16
-0002e8 bf0f                      		OUT SREG, R16
-0002e9 910f                      		POP R16
-0002ea 9518                      		RETI 
-                                 	
-                                 // *********************************************************************************************************************************************//
-                                 // Tablas de datos
-                                 
-                                 	Table_7seg: // Símbolos del 0 al 9
-0002eb 4277
-0002ec 6b6d
-0002ed 3b5a
-0002ee 623f
+000050 912f                      		POP R18
+000051 911f                      		POP R17
+000052 910f                      		POP R16
+000053 bf0f                      		OUT SREG, R16
+000054 910f                      		POP R16
 
 
 RESOURCE USE INFORMATION
@@ -1901,40 +1124,40 @@ counted separately from r26..r31 here.
 .dseg memory usage only counts static data declared with .byte
 
 "ATmega328P" register use summary:
-x  :   0 y  :   0 z  :  10 r0 :   0 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
+x  :   0 y  :   0 z  :   0 r0 :   0 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
 r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 
-r13:   0 r14:   0 r15:   0 r16: 164 r17:  85 r18:  40 r19:  47 r20:  31 
-r21:  19 r22:  16 r23:   9 r24:   4 r25:   0 r26:   0 r27:   0 r28:   0 
-r29:   0 r30:  17 r31:   9 
-Registers used: 12 out of 35 (34.3%)
+r13:   0 r14:   0 r15:   0 r16:  28 r17:   9 r18:   3 r19:   0 r20:   0 
+r21:   0 r22:   0 r23:   0 r24:   0 r25:   0 r26:   0 r27:   0 r28:   0 
+r29:   0 r30:   0 r31:   0 
+Registers used: 3 out of 35 (8.6%)
 
 "ATmega328P" instruction use summary:
-.lds  :   0 .sts  :   0 adc   :   0 add   :  11 adiw  :   0 and   :   0 
-andi  :   4 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
-brcc  :   0 brcs  :   0 break :   0 breq  :  20 brge  :   0 brhc  :   0 
-brhs  :   0 brid  :   0 brie  :   0 brlo  :  10 brlt  :   0 brmi  :   0 
-brne  :   9 brpl  :   0 brsh  :  12 brtc  :   0 brts  :   0 brvc  :   0 
-brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   2 cbr   :   1 
-clc   :   0 clh   :   0 cli   :   1 cln   :   0 clr   :  23 cls   :   0 
+.lds  :   0 .sts  :   0 adc   :   0 add   :   0 adiw  :   0 and   :   0 
+andi  :   0 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
+brcc  :   0 brcs  :   0 break :   0 breq  :   0 brge  :   0 brhc  :   0 
+brhs  :   0 brid  :   0 brie  :   0 brlo  :   0 brlt  :   0 brmi  :   0 
+brne  :   1 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
+brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   0 cbr   :   0 
+clc   :   0 clh   :   0 cli   :   1 cln   :   0 clr   :   4 cls   :   0 
 clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   0 cpc   :   0 
-cpi   :  51 cpse  :   1 dec   :   0 eor   :   0 fmul  :   0 fmuls :   0 
-fmulsu:   0 icall :   0 ijmp  :   0 in    :   6 inc   :  27 jmp   :   0 
-ld    :   0 ldd   :   0 ldi   :  60 lds   :  64 lpm   :  20 lsl   :   0 
-lsr   :   0 mov   :   1 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
-neg   :   0 nop   :   0 or    :   0 ori   :   0 out   :  21 pop   :  23 
-push  :  23 rcall :   0 ret   :   0 reti  :   4 rjmp  :  55 rol   :   0 
-ror   :   0 sbc   :   0 sbci  :   0 sbi   :   7 sbic  :   0 sbis  :   4 
+cpi   :   1 cpse  :   0 dec   :   0 eor   :   0 fmul  :   0 fmuls :   0 
+fmulsu:   0 icall :   0 ijmp  :   0 in    :   1 inc   :   1 jmp   :   0 
+ld    :   0 ldd   :   0 ldi   :  10 lds   :   1 lpm   :   0 lsl   :   0 
+lsr   :   0 mov   :   0 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
+neg   :   0 nop   :   0 or    :   0 ori   :   0 out   :   8 pop   :   4 
+push  :   4 rcall :   0 ret   :   0 reti  :   1 rjmp  :   4 rol   :   0 
+ror   :   0 sbc   :   0 sbci  :   0 sbi   :   1 sbic  :   0 sbis  :   0 
 sbiw  :   0 sbr   :   0 sbrc  :   0 sbrs  :   0 sec   :   0 seh   :   0 
-sei   :   1 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
-sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 sts   : 102 
+sei   :   0 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
+sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 sts   :   6 
 sub   :   0 subi  :   0 swap  :   0 tst   :   0 wdr   :   0 
-Instructions used: 27 out of 113 (23.9%)
+Instructions used: 15 out of 113 (13.3%)
 
 "ATmega328P" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x0005e0   1438     10   1448   32768   4.4%
-[.dseg] 0x000100 0x000119      0     25     25    2048   1.2%
+[.cseg] 0x000000 0x0000ac    110      0    110   32768   0.3%
+[.dseg] 0x000100 0x000101      0      1      1    2048   0.0%
 [.eseg] 0x000000 0x000000      0      0      0    1024   0.0%
 
 Assembly complete, 0 errors, 0 warnings

@@ -1,0 +1,32 @@
+<ASSEMBLER_INFO>
+ <VERSION>2.2.8</VERSION>
+ <DEVICE>"ATmega328P"</DEVICE>
+ <WORKING_DIR>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Prueba_buzzer\Prueba_buzzer\Debug</WORKING_DIR>
+ <INCLUDE_PATH>
+  <DIR>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc</DIR>
+  <DIR>C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avrassembler\Include</DIR>
+  <DIR></DIR>
+ </INCLUDE_PATH>
+ <SOURCE_FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Prueba_buzzer\Prueba_buzzer\main.asm</SOURCE_FILE>
+ <INCLUDED_FILES>
+  <FILE>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc</FILE>
+  <FILE>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc</FILE>
+ </INCLUDED_FILES>
+ <OBJECT_FILES>
+  <FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Prueba_buzzer\Prueba_buzzer\Debug\Prueba_buzzer.obj</FILE>
+ </OBJECT_FILES>
+ <HEX_FILES>
+  <FILE>Prueba_buzzer.hex</FILE>
+ </HEX_FILES>
+ <OUTPUT_FILES>
+  <FILE>Prueba_buzzer.map</FILE>
+  <FILE>Prueba_buzzer.lss</FILE>
+ </OUTPUT_FILES>
+ <LABELS>
+  <cnt_LEDR><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Prueba_buzzer\Prueba_buzzer\main.asm</FILE><LINE>4</LINE></cnt_LEDR>
+  <start><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Prueba_buzzer\Prueba_buzzer\main.asm</FILE><LINE>13</LINE></start>
+  <ISR_timer0><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Prueba_buzzer\Prueba_buzzer\main.asm</FILE><LINE>51</LINE></ISR_timer0>
+  <MAIN><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Prueba_buzzer\Prueba_buzzer\main.asm</FILE><LINE>47</LINE></MAIN>
+  <RETURN_ISR_timer0><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Prueba_buzzer\Prueba_buzzer\main.asm</FILE><LINE>73</LINE></RETURN_ISR_timer0>
+ </LABELS>
+</ASSEMBLER_INFO>
