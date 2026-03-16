@@ -50,10 +50,10 @@
   <modo><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>45</LINE></modo>
   <start><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>68</LINE></start>
   <ISR_PCINT0><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>510</LINE></ISR_PCINT0>
-  <ISR_timer2><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>715</LINE></ISR_timer2>
-  <ISR_timer1><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>779</LINE></ISR_timer1>
-  <ISR_timer0><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>810</LINE></ISR_timer0>
-  <Table_7seg><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>851</LINE></Table_7seg>
+  <ISR_timer2><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>983</LINE></ISR_timer2>
+  <ISR_timer1><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>1047</LINE></ISR_timer1>
+  <ISR_timer0><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>1078</LINE></ISR_timer0>
+  <Table_7seg><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>1119</LINE></Table_7seg>
   <Verificar_MODO><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>214</LINE></Verificar_MODO>
   <HORA><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>220</LINE></HORA>
   <FECHA><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>257</LINE></FECHA>
@@ -72,10 +72,10 @@
   <INC_u_dias_B><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>417</LINE></INC_u_dias_B>
   <BOTON_1><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>554</LINE></BOTON_1>
   <BOTON_2><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>668</LINE></BOTON_2>
-  <BOTON_3><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>672</LINE></BOTON_3>
-  <BOTON_4><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>685</LINE></BOTON_4>
+  <BOTON_3><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>940</LINE></BOTON_3>
+  <BOTON_4><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>953</LINE></BOTON_4>
   <BOTON_0><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>549</LINE></BOTON_0>
-  <EXIT_ISR_PCINT0><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>700</LINE></EXIT_ISR_PCINT0>
+  <EXIT_ISR_PCINT0><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>968</LINE></EXIT_ISR_PCINT0>
   <ACCION_B1><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>560</LINE></ACCION_B1>
   <B1_HORA><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>567</LINE></B1_HORA>
   <B1_FECHA><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>612</LINE></B1_FECHA>
@@ -87,13 +87,33 @@
   <INC_CONFIG_D_DIAS><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>634</LINE></INC_CONFIG_D_DIAS>
   <INC_CONFIG_U_MESES><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>645</LINE></INC_CONFIG_U_MESES>
   <INC_CONFIG_D_MESES><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>655</LINE></INC_CONFIG_D_MESES>
-  <BOTON_3A><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>680</LINE></BOTON_3A>
-  <show_dispd2><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>740</LINE></show_dispd2>
-  <show_dispd1><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>747</LINE></show_dispd1>
-  <show_dispi2><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>754</LINE></show_dispi2>
-  <show_dispi1><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>761</LINE></show_dispi1>
-  <RETURN_ISR_timer2><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>768</LINE></RETURN_ISR_timer2>
-  <RETURN_ISR_timer1><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>800</LINE></RETURN_ISR_timer1>
-  <RETURN_ISR_timer0><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>838</LINE></RETURN_ISR_timer0>
+  <ACCION_B2><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>674</LINE></ACCION_B2>
+  <B2_HORA><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>681</LINE></B2_HORA>
+  <B2_FECHA><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>780</LINE></B2_FECHA>
+  <DEC_CONFIG_U_MINUTOS><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>693</LINE></DEC_CONFIG_U_MINUTOS>
+  <DEC_CONFIG_D_MINUTOS><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>705</LINE></DEC_CONFIG_D_MINUTOS>
+  <DEC_CONFIG_U_HORAS><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>717</LINE></DEC_CONFIG_U_HORAS>
+  <DEC_CONFIG_D_HORAS><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>757</LINE></DEC_CONFIG_D_HORAS>
+  <UNDERFLOW_HORAS><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>748</LINE></UNDERFLOW_HORAS>
+  <UNDERFLOW_U_HORAS><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>737</LINE></UNDERFLOW_U_HORAS>
+  <UNDERFLOW_D_HORAS><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>771</LINE></UNDERFLOW_D_HORAS>
+  <DEC_CONFIG_U_DIAS><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>796</LINE></DEC_CONFIG_U_DIAS>
+  <DEC_CONFIG_D_DIAS><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>868</LINE></DEC_CONFIG_D_DIAS>
+  <DEC_CONFIG_U_MESES><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>886</LINE></DEC_CONFIG_U_MESES>
+  <DEC_CONFIG_D_MESES><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>922</LINE></DEC_CONFIG_D_MESES>
+  <UNDERFLOW_28_DIAS><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>827</LINE></UNDERFLOW_28_DIAS>
+  <UNDERFLOW_U_DIAS><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>816</LINE></UNDERFLOW_U_DIAS>
+  <UNDERFLOW_31_DIAS><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>840</LINE></UNDERFLOW_31_DIAS>
+  <UNDERFLOW_30_DIAS><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>859</LINE></UNDERFLOW_30_DIAS>
+  <UNDERFLOW_MESES><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>913</LINE></UNDERFLOW_MESES>
+  <UNDERFLOW_D_MESES><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>906</LINE></UNDERFLOW_D_MESES>
+  <BOTON_3A><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>948</LINE></BOTON_3A>
+  <show_dispd2><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>1008</LINE></show_dispd2>
+  <show_dispd1><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>1015</LINE></show_dispd1>
+  <show_dispi2><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>1022</LINE></show_dispi2>
+  <show_dispi1><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>1029</LINE></show_dispi1>
+  <RETURN_ISR_timer2><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>1036</LINE></RETURN_ISR_timer2>
+  <RETURN_ISR_timer1><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>1068</LINE></RETURN_ISR_timer1>
+  <RETURN_ISR_timer0><FILE>C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm</FILE><LINE>1106</LINE></RETURN_ISR_timer0>
  </LABELS>
 </ASSEMBLER_INFO>

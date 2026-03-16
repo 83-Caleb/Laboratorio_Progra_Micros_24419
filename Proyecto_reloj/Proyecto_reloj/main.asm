@@ -551,7 +551,7 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 		STS config, R16 // Activamos configuración: config = 0xFF
 		RJMP EXIT_ISR_PCINT0
 
-	BOTON_1:
+	BOTON_1: // Botón de incremento
 		LDS R16, config
 		CPI R16, 0x00
 		BRNE ACCION_B1
@@ -666,8 +666,276 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 		RJMP EXIT_ISR_PCINT0
 		
 	BOTON_2: // Botón de decremento
+		LDS R16, config
+		CPI R16, 0x00
+		BRNE ACCION_B2
+		RJMP EXIT_ISR_PCINT0 // Si no estamos en configuración, no tiene efecto la pulsación
 
+		ACCION_B2:
+		LDS R16, modo
+		CPI R16, 0x00
+		BREQ B2_HORA // Branch si estamos en modo hora
 
+		RJMP B2_FECHA // Branch si estamos en modo fecha (no estamos en hora ni en alarma)
+
+		B2_HORA:
+			LDS R17, disp_config // Decrementamos el valor del display seleccionado (cambia con el B4)
+			
+			CPI R17, 0x00
+			BREQ DEC_CONFIG_U_MINUTOS // disp_config = 0 decrementa u_minutos
+			CPI R17, 0x01
+			BREQ DEC_CONFIG_D_MINUTOS // disp_config = 1 decrementa d_minutos
+			CPI R17, 0x02
+			BREQ DEC_CONFIG_U_HORAS // disp_config = 2 decrementa u_horas
+
+			RJMP DEC_CONFIG_D_HORAS // disp_config = 3 o más, decrementa d_horas
+
+			DEC_CONFIG_U_MINUTOS: // Regresamos 1 minuto
+				LDS R19, u_minutos
+				CPI R19, 0x00
+				BRNE PC+5 // salta LDI(1) + STS(2) + RJMP(1) = 4
+				LDI R19, 0x09 // tarda 1 ciclo
+				STS u_minutos, R19 // tarda 2 ciclos (hay que tomarlo en cuenta)
+				RJMP EXIT_ISR_PCINT0 // tarda 1 ciclo
+				
+				DEC R19
+				STS u_minutos, R19
+				RJMP EXIT_ISR_PCINT0
+
+			DEC_CONFIG_D_MINUTOS: // Regresamos 10 minutos
+				LDS R19, d_minutos
+				CPI R19, 0x00
+				BRNE PC+5
+				LDI R19, 0x05
+				STS d_minutos, R19
+				RJMP EXIT_ISR_PCINT0
+				
+				DEC R19
+				STS d_minutos, R19
+				RJMP EXIT_ISR_PCINT0
+
+			DEC_CONFIG_U_HORAS: // Regresamos 1 hora (en contador general y en el de unidades)
+				LDS R20, cnt_horas
+				CPI R20, 0x00 // Si estamos en 00 horas, regresar a 23
+				BREQ UNDERFLOW_HORAS
+				
+				LDS R19, d_horas
+				CPI R19, 0x00 // Si las decenas de hora no son 0, verificamos si hay underflow
+				BREQ PC+5 // Porque LDS tarda 2 ciclos
+				LDS R18, u_horas
+				CPI R18, 0x00 // Si hay underflow, saltamos a UNDERFLOW_U_HORAS
+				BREQ UNDERFLOW_U_HORAS
+				
+				LDS R18, u_horas // Si no hay underflow de ningún tipo, solo decrementamos las unidades y el contador
+				DEC R18
+				STS u_horas, R18
+				LDS R20, cnt_horas
+				DEC R20
+				STS cnt_horas, R20
+				RJMP EXIT_ISR_PCINT0
+				
+				UNDERFLOW_U_HORAS: // Pasamos de 10 a 09 o de 20 a 19 horas
+					LDS R20, cnt_horas 
+					DEC R20 // Disminuye el contador general en 1
+					STS cnt_horas, R20
+					LDS R19, d_horas
+					DEC R19 // Disminuye las decenas en 1
+					STS d_horas, R19
+					LDI R18, 0x09 // Regresamos las unidades a 9 
+					STS u_horas, R18
+					RJMP EXIT_ISR_PCINT0
+					
+				UNDERFLOW_HORAS: // Pasamos de 00 a 23 horas
+					LDI R20, 23
+					STS cnt_horas, R20 // Regresamos el contador a 23 horas
+					LDI R19, 0x02
+					STS d_horas, R19 // Regresamos las decenas a 2
+					LDI R19, 0X03
+					STS u_horas, R19 // Regresamos las unidades a 3
+					RJMP EXIT_ISR_PCINT0
+
+			DEC_CONFIG_D_HORAS: // Regresamos 10 horas en contador general y 1 en el de decenas
+				LDS R20, cnt_horas
+				CPI R20, 0x0A // Si en el contador general hay menos de 10 horas, hacemos underflow
+				BRLO UNDERFLOW_D_HORAS
+				
+				LDS R19, d_horas 
+				DEC R19
+				STS d_horas, R19
+
+				LDS R20, cnt_horas
+				SUBI R20, 0x0A
+				STS cnt_horas, R20
+				RJMP EXIT_ISR_PCINT0
+				
+				UNDERFLOW_D_HORAS: // Pasamos a 23 horas
+					LDI R20, 23
+					STS cnt_horas, R20 // Regresamos el contador a 23 horas
+					LDI R19, 0x02
+					STS d_horas, R19 // Regresamos las decenas a 2
+					LDI R19, 0X03
+					STS u_horas, R19 // Regresamos las unidades a 3
+					RJMP EXIT_ISR_PCINT0
+
+		B2_FECHA:
+			LDS R17, disp_config // Incrementamos el valor del display seleccionado (cambia con el B4)
+			
+			CPI R17, 0x00
+			BREQ DEC_CONFIG_U_DIAS // disp_config = 0 decrementa u_dias
+			
+			CPI R17, 0x01
+			BRNE PC+2
+			RJMP DEC_CONFIG_D_DIAS // disp_config = 1 decrementa d_dias
+			
+			CPI R17, 0x02
+			BRNE PC+2
+			RJMP DEC_CONFIG_U_MESES // disp_config = 2 decrementa u_meses
+
+			RJMP DEC_CONFIG_D_MESES // disp_config = 3+ decrementa d_meses
+
+			DEC_CONFIG_U_DIAS: // Regresamos 1 dia (en contador general y en el de unidades)
+				LDS R20, cnt_dias // Verificamos si hay que hacer underflow, regresando a la cantidad máxima de días de cada mes
+				CPI R20, 0x01
+				BREQ UNDERFLOW_28_DIAS
+				
+				LDS R18, d_dias
+				CPI R18, 0x00 // Decenas en 0?
+				BREQ PC+5 // Si las decenas están en 1, 2 o 3, verificamos si los días están en 0
+				LDS R19, u_dias
+				CPI R19, 0x00
+				BREQ UNDERFLOW_U_DIAS // Saltamos a hacer el underflow
+
+				LDS R20, cnt_dias // Si no hay que hacer underflow, solo disminuimos una unidad de día de ambos contadores
+				DEC R20
+				STS cnt_dias, R20
+				LDS R19, u_dias
+				DEC R19
+				STS u_dias, R19
+				RJMP EXIT_ISR_PCINT0
+
+				UNDERFLOW_U_DIAS: // Pasamos de 10 a 09, 20 a 19 o 30 a 29
+					LDS R20, cnt_dias
+					DEC R20
+					STS cnt_dias, R20 // Restamos 1 día al contador
+					LDS R18, d_dias
+					DEC R18
+					STS d_dias, R18 // Restamos 1 a decenas de día
+					LDI R19, 0x09
+					STS u_dias, R19 // Decenas de días a 9
+					RJMP EXIT_ISR_PCINT0
+
+				UNDERFLOW_28_DIAS:
+					LDS R16, cnt_meses
+					CPI R16, 0x02
+					BRNE UNDERFLOW_31_DIAS // Si no estamos en febrero, verificamos en qué mes estamos
+				
+					LDI R18, 28 // Si estamos en febrero regresamos a 28 días
+					STS cnt_dias, R18
+					LDI R19, 0x08 // Cargamos una unidad de día
+					STS u_dias, R19
+					LDI R20, 0x02 // Cargamos 2 decenas de día
+					STS d_dias, R20
+					RJMP EXIT_ISR_PCINT0
+
+				UNDERFLOW_31_DIAS:
+					LDS R16, cnt_meses // Buscamos si estamos en un mes con 30 días
+					CPI R16, 0x04 // Abril
+					BREQ UNDERFLOW_30_DIAS 
+					CPI R16, 0x06 // Junio
+					BREQ UNDERFLOW_30_DIAS 
+					CPI R16, 0x09 // Septiembre
+					BREQ UNDERFLOW_30_DIAS 
+					CPI R16, 0x0B // Noviembre
+					BREQ UNDERFLOW_30_DIAS 
+
+					LDI R18, 31 // Si seguimos en esta subrutina, el mes en el que estamos tiene 31 días
+					STS cnt_dias, R18
+					LDI R19, 0x01 // Cargamos una unidad de día
+					STS u_dias, R19
+					LDI R20, 0x03 // Cargamos 1 decena de día
+					STS d_dias, R20
+					RJMP EXIT_ISR_PCINT0
+
+				UNDERFLOW_30_DIAS:
+					LDI R18, 30 // Si caemos en esta subrutina, el mes en el que estamos tiene 30 días
+					STS cnt_dias, R18
+					LDI R19, 0x00 // Cargamos 0 como unidad de día
+					STS u_dias, R19
+					LDI R20, 0x03 // Cargamos 3 decenas de día
+					STS d_dias, R20
+					RJMP EXIT_ISR_PCINT0
+			
+			DEC_CONFIG_D_DIAS: // Restamos 10 días a los contadores
+					LDS R18, d_dias
+					LDI R21, 0x0A
+					MUL R18, R21    
+					LDS R19, u_dias
+					ADD R0, R19 // cnt_dias = d_dias*10 + u_dias
+					MOV R18, R0
+					STS cnt_dias, R18
+
+					CPI R18, 0x0B
+					BRLO UNDERFLOW_28_DIAS // Si el contador de días es igual o menor a 10 y restamos 10, cargamos los días máximos del mes correspondiente
+					SUBI R18, 0x0A
+					STS cnt_dias, R18
+					LDS R19, d_dias
+					DEC R19
+					STS d_dias, R19
+					RJMP EXIT_ISR_PCINT0
+
+			DEC_CONFIG_U_MESES:
+				LDS R18, d_meses //cnt_meses = d_meses*10 + u_meses
+				LDI R21, 0x0A
+				MUL R18, R21      
+				LDS R19, u_meses
+				ADD R0, R19
+				MOV R18, R0
+				STS cnt_meses, R18  
+
+				CPI R18, 0x01
+				BREQ UNDERFLOW_MESES
+				DEC R18
+				STS cnt_meses, R18
+				LDS R19, u_meses
+				DEC R19
+				CPI R19, 0xFF // Verificamos si hubo underflow
+				BREQ UNDERFLOW_D_MESES
+				STS u_meses, R19
+				RJMP EXIT_ISR_PCINT0
+				
+				UNDERFLOW_D_MESES: // Pasamos de 10 a 09
+					LDI R19, 0x09
+					STS u_meses, R19
+					CLR R20
+					STS d_meses, R20
+					RJMP EXIT_ISR_PCINT0
+
+				UNDERFLOW_MESES: // Cargamos diciembre
+					LDI R18, 12
+					STS cnt_meses, R18 // Contador a 12
+					LDI R19, 0x02
+					STS u_meses, R19 // Unidades a 2
+					LDI R20, 0x01
+					STS d_meses, R20 // Decenas a 1
+					RJMP EXIT_ISR_PCINT0
+
+			DEC_CONFIG_D_MESES:
+				LDS R18, d_meses // cnt_meses = d_meses*10 + u_meses
+				LDI R21, 0x0A
+				MUL R18, R21
+				LDS R19, u_meses
+				ADD R0, R19
+				MOV R18, R0
+				STS cnt_meses, R18
+
+				CPI R18, 0x0B
+				BRLO UNDERFLOW_MESES // Si el valor del contador era igual o menor a 10 y restamos 10, cargamos diciembre
+				SUBI R18, 0x0A
+				STS cnt_meses, R18
+				LDS R19, d_meses
+				DEC R19
+				STS d_meses, R19
+				RJMP EXIT_ISR_PCINT0
 
 	BOTON_3: // Botón de cambio de modo
 		LDS R19, modo
