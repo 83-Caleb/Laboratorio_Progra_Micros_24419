@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.8  C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm Sun Mar 15 19:39:55 2026
+AVRASM ver. 2.2.8  C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm Tue Mar 17 01:54:29 2026
 
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc'
 C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_reloj\Proyecto_reloj\main.asm(7): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
@@ -1071,9 +1071,16 @@ C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_r
 000114                           al_d_minutos: .byte 1
 000115                           al_u_horas: .byte 1
 000116                           al_d_horas: .byte 1
+000117                           al_horas: .byte 1
+000118                           backup_u_minutos: .byte 1
+000119                           backup_d_minutos: .byte 1
+00011a                           backup_u_horas: .byte 1
+00011b                           backup_d_horas: .byte 1
+00011c                           backup_horas: .byte 1
+00011d                           flag_alarma: .byte 1
                                  
-000117                           config: .byte 1 // Bandera de configuración [0xFF es config activada]
-000118                           modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es modo hora, 0x55 es config alarma]
+00011e                           config: .byte 1 // Bandera de configuración [0xFF es config activada]
+00011f                           modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es modo hora, 0x55 es config alarma]
                                  
                                  // *********************************************************************************************************************************************//
                                  // CODE SEGMENT: Comienza el programa
@@ -1082,16 +1089,16 @@ C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_r
 000000 c020                        	RJMP start
                                  
                                  .org PCI0addr // Interrupción para pin change en PORTB
-000006 c1b5                      	RJMP ISR_PCINT0
+000006 c1cf                      	RJMP ISR_PCINT0
                                  
                                  .org OVF2addr // Interrupción por timer2
-000012 c386                      	RJMP ISR_timer2
+000012 c402                      	RJMP ISR_timer2
                                  
                                  .org OVF1addr // Interrupción por timer1
-00001a c3b5                      	RJMP ISR_timer1
+00001a c445                      	RJMP ISR_timer1
                                  
                                  .org OVF0addr // Interrupción por timer0
-000020 c3ca                      	RJMP ISR_timer0
+000020 c470                      	RJMP ISR_timer0
                                  	
                                  // *********************************************************************************************************************************************//
                                  // Configuraciones generales del microcontrolador
@@ -1105,7 +1112,7 @@ C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_r
 000024 e008                      		LDI R16, HIGH(RAMEND) // LDI R16 0x08
 000025 bf0e                      		OUT SPH, R16 // Ahora este tiene 0x08FF
                                  
-                                 	// Configuración del oscilador general a 1MHz
+                                 		// Configuración del oscilador general a 1MHz
 000026 e800                      		LDI R16, (1<<CLKPCE) // Carga 0x80 (1000_0000)
 000027 9300 0061                 		STS CLKPR, R16 // Enable del prescaler
 000029 e004                      		LDI R16, (1<<CLKPS2) // Set del CLKPS2 (0000_0100), que divide entre 16
@@ -1147,7 +1154,7 @@ C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_r
 00004b 9300 00b0                 		STS TCCR2A, R16 // Timer2 en modo normal
 00004d e006                      		LDI R16, (1<<CS22)|(1<<CS21) // Prescaler de 256
 00004e 9300 00b1                 		STS TCCR2B, R16
-000050 ef0a                      		LDI R16, 250 // Empezar a contar desde 250
+000050 ef0e                      		LDI R16, 254 // Empezar a contar desde 254
 000051 9300 00b2                 		STS TCNT2, R16
 000053 e001                      		LDI R16, (1<<TOIE2) // Enable del overflow interrupt
 000054 9300 0070                 		STS TIMSK2, R16
@@ -1175,8 +1182,8 @@ C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_r
 000067 b90b                      		OUT PORTD, R16
                                  
                                  	// Configuración del vector z
-000068 e0f8                      		LDI ZH, HIGH(Table_7seg<<1)
-000069 e1e8                      		LDI ZL, LOW(Table_7seg<<1)
+000068 e0f9                      		LDI ZH, HIGH(Table_7seg<<1)
+000069 e6e4                      		LDI ZL, LOW(Table_7seg<<1)
                                  
                                  	// Inicializar registros a utilizar
                                  
@@ -1192,8 +1199,8 @@ C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_r
                                  
 000076 2700                      		CLR R16 // Los demás registros comienzan en 0
                                  		
-000077 9300 0117                 		STS config, R16
-000079 9300 0118                 		STS modo, R16
+000077 9300 011e                 		STS config, R16
+000079 9300 011f                 		STS modo, R16
 00007b 9300 0101                 		STS disp_activo, R16
 00007d 9300 0102                 		STS disp_config, R16
                                  		
@@ -1215,27 +1222,40 @@ C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_r
                                  
 000098 e000                      		LDI R16, 0x00 // La alarma está programada por default para las 7 de la mañana
 000099 9300 0113                 		STS al_u_minutos, R16
-00009b 9300 0114                 		STS	al_d_minutos, R16
+00009b 9300 0114                 		STS al_d_minutos, R16
 00009d 9300 0116                 		STS al_d_horas, R16
-00009f e007                      		LDI R16, 0x07
-0000a0 9300 0115                 		STS al_u_horas, R16
+00009f 9300 0118                 		STS backup_u_minutos, R16
+0000a1 9300 0119                 		STS backup_d_minutos, R16
+0000a3 9300 011a                 		STS backup_u_horas, R16
+0000a5 9300 011b                 		STS backup_d_horas, R16
+0000a7 9300 011c                 		STS backup_horas, R16
+                                 
+0000a9 e007                      		LDI R16, 0x07
+0000aa 9300 0115                 		STS al_u_horas, R16
+0000ac 9300 0117                 		STS al_horas, R16
+0000ae e000                      		LDI R16, 0x00
+0000af 9300 011d                 		STS flag_alarma, R16
                                  
                                  		// Registros de propósito general
-0000a2 2700                      		CLR R16
-0000a3 2711                      		CLR R17
-0000a4 2722                      		CLR R18
-0000a5 2733                      		CLR R19
-0000a6 2744                      		CLR R20
-0000a7 2755                      		CLR R21
-0000a8 2766                      		CLR R22
-0000a9 2777                      		CLR R23
-0000aa 2788                      		CLR R24
+0000b1 2700                      		CLR R16
+0000b2 2711                      		CLR R17
+0000b3 2722                      		CLR R18
+0000b4 2733                      		CLR R19
+0000b5 2744                      		CLR R20
+0000b6 2755                      		CLR R21
+0000b7 2766                      		CLR R22
+0000b8 2777                      		CLR R23
+0000b9 2788                      		CLR R24
+0000ba 27cc                      		CLR R28
+0000bb 27dd                      		CLR R29
+0000bc 27ee                      		CLR R30
+0000bd 2755                      		CLR R21
                                  
                                  		// Estado incial de los displays (solo durante la carga inicial)
-0000ab 9104                      		LPM R16, Z // Guardar el número actual (0 en el display)
-0000ac b90b                      		OUT PORTD, R16 // Mostrar el número 0
+0000be 9104                      		LPM R16, Z // Guardar el número actual (0 en el display)
+0000bf b90b                      		OUT PORTD, R16 // Mostrar el número 0
                                  
-0000ad 9478                      		SEI // Habilitar interrupciones globales
+0000c0 9478                      		SEI // Habilitar interrupciones globales
                                  
                                  // *********************************************************************************************************************************************//
                                  // Programa principal
@@ -1243,293 +1263,301 @@ C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_r
                                  // Subrutinas para mostrar fecha y hora según el modo
                                  
                                  	Verificar_MODO:
-0000ae 9100 0118                 		LDS R16, modo
-0000b0 3f0f                      		CPI R16, 0xFF
-0000b1 f409                      		BRNE HORA
-0000b2 c023                      		RJMP FECHA
+0000c1 9100 011f                 		LDS R16, modo
+0000c3 3f0f                      		CPI R16, 0xFF
+0000c4 f409                      		BRNE HORA
+0000c5 c02a                      		RJMP FECHA
                                  
                                  	HORA:
                                  		// Unidades de minutos
-0000b3 e0f8                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
-0000b4 e1e8                      		LDI ZL, LOW(Table_7seg<<1)
-0000b5 9100 010b                 		LDS R16, u_minutos
-0000b7 0fe0                      		ADD ZL, R16
-0000b8 9114                      		LPM R17, Z
-0000b9 9310 0106                 		STS disp_d2, R17
+0000c6 e0f9                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
+0000c7 e6e4                      		LDI ZL, LOW(Table_7seg<<1)
+0000c8 9100 010b                 		LDS R16, u_minutos
+0000ca 0fe0                      		ADD ZL, R16
+0000cb 9114                      		LPM R17, Z
+0000cc 9310 0106                 		STS disp_d2, R17
                                  
                                  		// Decenas de minutos
-0000bb e0f8                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
-0000bc e1e8                      		LDI ZL, LOW(Table_7seg<<1)
-0000bd 9100 010c                 		LDS R16, d_minutos
-0000bf 0fe0                      		ADD ZL, R16
-0000c0 9114                      		LPM R17, Z
-0000c1 9310 0105                 		STS disp_d1, R17
+0000ce e0f9                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
+0000cf e6e4                      		LDI ZL, LOW(Table_7seg<<1)
+0000d0 9100 010c                 		LDS R16, d_minutos
+0000d2 0fe0                      		ADD ZL, R16
+0000d3 9114                      		LPM R17, Z
+0000d4 9310 0105                 		STS disp_d1, R17
                                  
                                  		// Unidades de horas
-0000c3 e0f8                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
-0000c4 e1e8                      		LDI ZL, LOW(Table_7seg<<1)
-0000c5 9100 010d                 		LDS R16, u_horas
-0000c7 0fe0                      		ADD ZL, R16
-0000c8 9114                      		LPM R17, Z
-0000c9 9310 0104                 		STS disp_i2, R17
-                                 
-                                 		// Decenas de horas
-0000cb e0f8                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
-0000cc e1e8                      		LDI ZL, LOW(Table_7seg<<1)
-0000cd 9100 010e                 		LDS R16, d_horas
-0000cf 0fe0                      		ADD ZL, R16
-0000d0 9114                      		LPM R17, Z
-0000d1 9310 0103                 		STS disp_i1, R17
-                                 
-0000d3 9a40                      		SBI PORTC, PORTC0
-0000d4 9841                      		CBI PORTC, PORTC1
-0000d5 c023                      		RJMP Verificar_OVF
-                                 
-                                 	FECHA:
-                                 		// Unidades de dias
-0000d6 e0f8                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
-0000d7 e1e8                      		LDI ZL, LOW(Table_7seg<<1)
-0000d8 9100 010f                 		LDS R16, u_dias
+0000d6 e0f9                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
+0000d7 e6e4                      		LDI ZL, LOW(Table_7seg<<1)
+0000d8 9100 010d                 		LDS R16, u_horas
 0000da 0fe0                      		ADD ZL, R16
 0000db 9114                      		LPM R17, Z
 0000dc 9310 0104                 		STS disp_i2, R17
                                  
-                                 		// Decenas de dias
-0000de e0f8                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
-0000df e1e8                      		LDI ZL, LOW(Table_7seg<<1)
-0000e0 9100 0110                 		LDS R16, d_dias
+                                 		// Decenas de horas
+0000de e0f9                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
+0000df e6e4                      		LDI ZL, LOW(Table_7seg<<1)
+0000e0 9100 010e                 		LDS R16, d_horas
 0000e2 0fe0                      		ADD ZL, R16
 0000e3 9114                      		LPM R17, Z
 0000e4 9310 0103                 		STS disp_i1, R17
                                  
+0000e6 9100 011f                 		LDS R16, modo
+0000e8 3505                      		CPI R16, 0x55 // Si estamos configurando alarma, encendemos ambas luces
+0000e9 f019                      		BREQ PC+4
+0000ea 9a40                      		SBI PORTC, PORTC0 // LA encendida
+0000eb 9841                      		CBI PORTC, PORTC1 // LV apagada
+0000ec c026                      		RJMP Verificar_OVF
+                                 
+0000ed 9a40                      		SBI PORTC, PORTC0 // LA encendida
+0000ee 9a41                      		SBI PORTC, PORTC1 // LV encendida
+0000ef c023                      		RJMP Verificar_OVF
+                                 
+                                 
+                                 	FECHA:
+                                 		// Unidades de dias
+0000f0 e0f9                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
+0000f1 e6e4                      		LDI ZL, LOW(Table_7seg<<1)
+0000f2 9100 010f                 		LDS R16, u_dias
+0000f4 0fe0                      		ADD ZL, R16
+0000f5 9114                      		LPM R17, Z
+0000f6 9310 0104                 		STS disp_i2, R17
+                                 
+                                 		// Decenas de dias
+0000f8 e0f9                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
+0000f9 e6e4                      		LDI ZL, LOW(Table_7seg<<1)
+0000fa 9100 0110                 		LDS R16, d_dias
+0000fc 0fe0                      		ADD ZL, R16
+0000fd 9114                      		LPM R17, Z
+0000fe 9310 0103                 		STS disp_i1, R17
+                                 
                                  		// Unidades de meses
-0000e6 e0f8                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
-0000e7 e1e8                      		LDI ZL, LOW(Table_7seg<<1)
-0000e8 9100 0111                 		LDS R16, u_meses
-0000ea 0fe0                      		ADD ZL, R16
-0000eb 9114                      		LPM R17, Z
-0000ec 9310 0106                 		STS disp_d2, R17
+000100 e0f9                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
+000101 e6e4                      		LDI ZL, LOW(Table_7seg<<1)
+000102 9100 0111                 		LDS R16, u_meses
+000104 0fe0                      		ADD ZL, R16
+000105 9114                      		LPM R17, Z
+000106 9310 0106                 		STS disp_d2, R17
                                  
                                  		// Decenas de meses
-0000ee e0f8                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
-0000ef e1e8                      		LDI ZL, LOW(Table_7seg<<1)
-0000f0 9100 0112                 		LDS R16, d_meses
-0000f2 0fe0                      		ADD ZL, R16
-0000f3 9114                      		LPM R17, Z
-0000f4 9310 0105                 		STS disp_d1, R17
+000108 e0f9                      		LDI ZH, HIGH(Table_7seg<<1)	// Regresamos el valor de Z a 0 en el display
+000109 e6e4                      		LDI ZL, LOW(Table_7seg<<1)
+00010a 9100 0112                 		LDS R16, d_meses
+00010c 0fe0                      		ADD ZL, R16
+00010d 9114                      		LPM R17, Z
+00010e 9310 0105                 		STS disp_d1, R17
                                  		
-0000f6 9a41                      		SBI PORTC, PORTC1
-0000f7 9840                      		CBI PORTC, PORTC0
-0000f8 c000                      		RJMP Verificar_OVF
+000110 9a41                      		SBI PORTC, PORTC1
+000111 9840                      		CBI PORTC, PORTC0
+000112 c000                      		RJMP Verificar_OVF
                                  
                                  // Subrutinas de overflow para los contadores
                                  
                                  	Verificar_OVF:
-0000f9 9110 010b                 		LDS R17, u_minutos // Leemos las unidades de minutos que han pasado
-0000fb 301a                      		CPI R17, 0x0A // Si ya pasaron 10 u_minutos, hacemos overflow a decenas de minutos
-0000fc f5c0                      		BRSH INC_d_minutos
+000113 9110 010b                 		LDS R17, u_minutos // Leemos las unidades de minutos que han pasado
+000115 301a                      		CPI R17, 0x0A // Si ya pasaron 10 u_minutos, hacemos overflow a decenas de minutos
+000116 f5c0                      		BRSH INC_d_minutos
                                  
-0000fd 9120 010c                 		LDS R18, d_minutos // Leemos las decenas de minutos que han pasado
-0000ff 3026                      		CPI R18, 0x06 // Si ya pasaron 60 minutos, hacemos overflow a unidades de hora
-000100 f008                      		BRLO PC+2
-000101 c03e                      		RJMP INC_u_horas
+000117 9120 010c                 		LDS R18, d_minutos // Leemos las decenas de minutos que han pasado
+000119 3026                      		CPI R18, 0x06 // Si ya pasaron 60 minutos, hacemos overflow a unidades de hora
+00011a f008                      		BRLO PC+2
+00011b c03e                      		RJMP INC_u_horas
                                  		
-000102 9130 010d                 		LDS R19, u_horas // Leemos las unidades de horas que han pasado
-000104 303a                      		CPI R19, 0x0A // Si ya pasaron 10 horas, hacemos overflow a decenas de hora
-000105 f008                      		BRLO PC+2
-000106 c04b                      		RJMP INC_d_horas
+00011c 9130 010d                 		LDS R19, u_horas // Leemos las unidades de horas que han pasado
+00011e 303a                      		CPI R19, 0x0A // Si ya pasaron 10 horas, hacemos overflow a decenas de hora
+00011f f008                      		BRLO PC+2
+000120 c04b                      		RJMP INC_d_horas
                                  		
-000107 9110 0108                 		LDS R17, cnt_horas // Leemos las horas totales que han pasado (0 a 24)
-000109 3118                      		CPI R17, 24 // Si ya pasaron 24 horas, incrementamos el dia
-00010a f008                      		BRLO PC+2
-00010b c04f                      		RJMP INC_u_dias_A
+000121 9110 0108                 		LDS R17, cnt_horas // Leemos las horas totales que han pasado (0 a 24)
+000123 3118                      		CPI R17, 24 // Si ya pasaron 24 horas, incrementamos el dia
+000124 f008                      		BRLO PC+2
+000125 c04f                      		RJMP INC_u_dias_A
                                  		
-00010c 9150 010f                 		LDS R21, u_dias // Leemos las unidades de días que han pasado
-00010e 305a                      		CPI R21, 0x0A // Si ya pasaron 10, hacemos overflow a decenas de días
-00010f f008                      		BRLO PC+2
-000110 c069                      		RJMP INC_d_dias
+000126 9150 010f                 		LDS R21, u_dias // Leemos las unidades de días que han pasado
+000128 305a                      		CPI R21, 0x0A // Si ya pasaron 10, hacemos overflow a decenas de días
+000129 f008                      		BRLO PC+2
+00012a c069                      		RJMP INC_d_dias
                                  
-000111 9160 0110                 		LDS R22, d_dias
-000113 3064                      		CPI R22, 0x04 // Impedimos que se pueda cargar más de 4 decenas de días en el modo config
-000114 f419                      		BRNE Verificar_OVF_cnt_dias
-000115 2766                      		CLR R22
-000116 9360 0110                 		STS d_dias, R22
+00012b 9160 0110                 		LDS R22, d_dias
+00012d 3064                      		CPI R22, 0x04 // Impedimos que se pueda cargar más de 4 decenas de días en el modo config
+00012e f419                      		BRNE Verificar_OVF_cnt_dias
+00012f 2766                      		CLR R22
+000130 9360 0110                 		STS d_dias, R22
                                  		
                                  		Verificar_OVF_cnt_dias:
-000118 9110 0109                 		LDS R17, cnt_dias // Cargamos el contador actual de dias
+000132 9110 0109                 		LDS R17, cnt_dias // Cargamos el contador actual de dias
                                  
-00011a 9120 010a                 		LDS R18, cnt_meses // Tenemos que verificar si estamos en febrero, que es un caso especial
-00011c 3022                      		CPI R18, 2
-00011d f419                      		BRNE PC+4 // Si no, saltamos al siguiente bloque
-00011e 311d                      		CPI R17, 29
-00011f f008                      		BRLO PC+2 // Si estamos en un día mayor o igual a 29, nos vamos a incrementar meses
-000120 c072                      		RJMP INC_u_meses
+000134 9120 010a                 		LDS R18, cnt_meses // Tenemos que verificar si estamos en febrero, que es un caso especial
+000136 3022                      		CPI R18, 2
+000137 f419                      		BRNE PC+4 // Si no, saltamos al siguiente bloque
+000138 311d                      		CPI R17, 29
+000139 f008                      		BRLO PC+2 // Si estamos en un día mayor o igual a 29, nos vamos a incrementar meses
+00013a c072                      		RJMP INC_u_meses
                                  
-000121 3210                      		CPI R17, 32 // Si ya pasaron 31 días, toca incrementar el mes
-000122 f008                      		BRLO PC+2
-000123 c06f                      		RJMP INC_u_meses
-000124 311f                      		CPI R17, 31 // Si ya pasaron 30 días, verificamos en qué mes estamos
-000125 f008                      		BRLO PC+2
-000126 c061                      		RJMP V_30_DIAS
-000127 311d                      		CPI R17, 29 // Si ya pasaron 28 días, verificamos si estamos en febrero
-000128 f008                      		BRLO PC+2
-000129 c059                      		RJMP V_28_DIAS
+00013b 3210                      		CPI R17, 32 // Si ya pasaron 31 días, toca incrementar el mes
+00013c f008                      		BRLO PC+2
+00013d c06f                      		RJMP INC_u_meses
+00013e 311f                      		CPI R17, 31 // Si ya pasaron 30 días, verificamos en qué mes estamos
+00013f f008                      		BRLO PC+2
+000140 c061                      		RJMP V_30_DIAS
+000141 311d                      		CPI R17, 29 // Si ya pasaron 28 días, verificamos si estamos en febrero
+000142 f008                      		BRLO PC+2
+000143 c059                      		RJMP V_28_DIAS
                                  
-00012a 9170 0111                 		LDS R23, u_meses
-00012c 307a                      		CPI R23, 0x0A // Si se incrementa de 9 a 10 meses, debemos hacer overflow en unidades de meses
-00012d f008                      		BRLO PC+2
-00012e c07b                      		RJMP INC_d_meses
+000144 9170 0111                 		LDS R23, u_meses
+000146 307a                      		CPI R23, 0x0A // Si se incrementa de 9 a 10 meses, debemos hacer overflow en unidades de meses
+000147 f008                      		BRLO PC+2
+000148 c07b                      		RJMP INC_d_meses
                                  		
-00012f 9120 010a                 		LDS R18, cnt_meses // Revisamos si ya pasaron 12 meses para reiniciar
-000131 302d                      		CPI R18, 13
-000132 f008                      		BRLO PC+2
-000133 c07f                      		RJMP Reinicio_reloj
+000149 9120 010a                 		LDS R18, cnt_meses // Revisamos si ya pasaron 12 meses para reiniciar
+00014b 302d                      		CPI R18, 13
+00014c f008                      		BRLO PC+2
+00014d c07f                      		RJMP Reinicio_reloj
                                  
-000134 cf79                      		RJMP Verificar_MODO
+00014e cf72                      		RJMP Verificar_MODO
                                  
                                  	INC_d_minutos:
-000135 2711                      		CLR R17
-000136 9310 010b                 		STS u_minutos, R17 // Reiniciamos u_minutos, pasa de 9 a 0
+00014f 2711                      		CLR R17
+000150 9310 010b                 		STS u_minutos, R17 // Reiniciamos u_minutos, pasa de 9 a 0
                                  
-000138 9120 010c                 		LDS R18, d_minutos // Leemos las decenas de minutos que han pasado
-00013a 9523                      		INC R18 // Aumentamos las decenas de minutos
-00013b 3026                      		CPI R18, 0x06 // Si ya pasaron 60 minutos, hacemos overflow a unidades de hora
-00013c f418                      		BRSH INC_u_horas
+000152 9120 010c                 		LDS R18, d_minutos // Leemos las decenas de minutos que han pasado
+000154 9523                      		INC R18 // Aumentamos las decenas de minutos
+000155 3026                      		CPI R18, 0x06 // Si ya pasaron 60 minutos, hacemos overflow a unidades de hora
+000156 f418                      		BRSH INC_u_horas
                                  
-00013d 9320 010c                 		STS d_minutos, R18
-00013f cf6e                      		RJMP Verificar_MODO
+000157 9320 010c                 		STS d_minutos, R18
+000159 cf67                      		RJMP Verificar_MODO
                                  
                                  	INC_u_horas:
-000140 2722                      		CLR R18
-000141 9320 010c                 		STS d_minutos, R18 // Reiniciamos d_minutos, pasa de 5 a 0 (59 a 00 en los display d)
+00015a 2722                      		CLR R18
+00015b 9320 010c                 		STS d_minutos, R18 // Reiniciamos d_minutos, pasa de 5 a 0 (59 a 00 en los display d)
                                  
-000143 9110 0108                 		LDS R17, cnt_horas // Leemos las horas totales que han pasado (0 a 24)
-000145 9513                      		INC R17 // Aumentamos 1
-000146 3118                      		CPI R17, 24 // Si ya pasaron 24 horas, incrementamos el dia
-000147 f498                      		BRSH INC_u_dias_A
+00015d 9110 0108                 		LDS R17, cnt_horas // Leemos las horas totales que han pasado (0 a 24)
+00015f 9513                      		INC R17 // Aumentamos 1
+000160 3118                      		CPI R17, 24 // Si ya pasaron 24 horas, incrementamos el dia
+000161 f498                      		BRSH INC_u_dias_A
                                  
-000148 9310 0108                 		STS cnt_horas, R17 // Guardamos el nuevo valor de horas generales
+000162 9310 0108                 		STS cnt_horas, R17 // Guardamos el nuevo valor de horas generales
                                  
-00014a 9130 010d                 		LDS R19, u_horas // Leemos las unidades de horas que han pasado
-00014c 9533                      		INC R19 // Incrementamos
-00014d 303a                      		CPI R19, 0x0A // Si ya pasaron 10 horas, hacemos overflow a decenas de hora
-00014e f418                      		BRSH INC_d_horas
+000164 9130 010d                 		LDS R19, u_horas // Leemos las unidades de horas que han pasado
+000166 9533                      		INC R19 // Incrementamos
+000167 303a                      		CPI R19, 0x0A // Si ya pasaron 10 horas, hacemos overflow a decenas de hora
+000168 f418                      		BRSH INC_d_horas
                                  
-00014f 9330 010d                 		STS u_horas, R19
-000151 cf5c                      		RJMP Verificar_MODO
+000169 9330 010d                 		STS u_horas, R19
+00016b cf55                      		RJMP Verificar_MODO
                                  
                                  	INC_d_horas: // Si entramos a esta subrutina, es porque no está ocurriendo incremento de día
-000152 2733                      		CLR R19
-000153 9330 010d                 		STS u_horas, R19 // Reiniciamos unidades de horas
+00016c 2733                      		CLR R19
+00016d 9330 010d                 		STS u_horas, R19 // Reiniciamos unidades de horas
                                  
-000155 9140 010e                 		LDS R20, d_horas // Leemos las decenas de horas que han pasado
-000157 9543                      		INC R20
-000158 9340 010e                 		STS d_horas, R20 // Guardamos el nuevo valor
-00015a cf53                      		RJMP Verificar_MODO
+00016f 9140 010e                 		LDS R20, d_horas // Leemos las decenas de horas que han pasado
+000171 9543                      		INC R20
+000172 9340 010e                 		STS d_horas, R20 // Guardamos el nuevo valor
+000174 cf4c                      		RJMP Verificar_MODO
                                  
                                  	INC_u_dias_A:
-00015b 2700                      		CLR R16 // Reiniciamos los contadores de horas
-00015c 9300 0108                 		STS cnt_horas, R16
-00015e 9300 010d                 		STS u_horas, R16
-000160 9300 010e                 		STS d_horas, R16		
+000175 2700                      		CLR R16 // Reiniciamos los contadores de horas
+000176 9300 0108                 		STS cnt_horas, R16
+000178 9300 010d                 		STS u_horas, R16
+00017a 9300 010e                 		STS d_horas, R16		
                                  
-000162 9110 0109                 		LDS R17, cnt_dias // Cargamos el día actual e incrementamos 1
-000164 9513                      		INC R17
+00017c 9110 0109                 		LDS R17, cnt_dias // Cargamos el día actual e incrementamos 1
+00017e 9513                      		INC R17
                                  
-000165 3210                      		CPI R17, 32 // Si ya pasaron 31 días, toca incrementar el mes
-000166 f560                      		BRSH INC_u_meses
+00017f 3210                      		CPI R17, 32 // Si ya pasaron 31 días, toca incrementar el mes
+000180 f560                      		BRSH INC_u_meses
                                  		
-000167 311f                      		CPI R17, 31 // Si ya pasaron 30 días, verificamos en qué mes estamos
-000168 f4f8                      		BRSH V_30_DIAS
+000181 311f                      		CPI R17, 31 // Si ya pasaron 30 días, verificamos en qué mes estamos
+000182 f4f8                      		BRSH V_30_DIAS
                                  		
-000169 311d                      		CPI R17, 29 // Si ya pasaron 28 días, verificamos si estamos en febrero
-00016a f4c0                      		BRSH V_28_DIAS
+000183 311d                      		CPI R17, 29 // Si ya pasaron 28 días, verificamos si estamos en febrero
+000184 f4c0                      		BRSH V_28_DIAS
                                  
                                  	INC_u_dias_B:
-00016b 9310 0109                 		STS cnt_dias, R17 // Si no se activa ninguna de esas subrutinas, guardamos el valor nuevo de cnt_dias
+000185 9310 0109                 		STS cnt_dias, R17 // Si no se activa ninguna de esas subrutinas, guardamos el valor nuevo de cnt_dias
                                  
-00016d 9100 0117                 		LDS R16, config
-00016f 3f0f                      		CPI R16, 0xFF
-000170 f409                      		BRNE PC+2
-000171 cf3c                      		RJMP Verificar_modo
+000187 9100 011e                 		LDS R16, config
+000189 3f0f                      		CPI R16, 0xFF
+00018a f409                      		BRNE PC+2
+00018b cf35                      		RJMP Verificar_modo
                                  
-000172 9150 010f                 		LDS R21, u_dias
-000174 9553                      		INC R21
-000175 305a                      		CPI R21, 0x0A
-000176 f418                      		BRSH INC_d_dias
+00018c 9150 010f                 		LDS R21, u_dias
+00018e 9553                      		INC R21
+00018f 305a                      		CPI R21, 0x0A
+000190 f418                      		BRSH INC_d_dias
                                  
-000177 9350 010f                 		STS u_dias, R21
-000179 cf34                      		RJMP Verificar_MODO
+000191 9350 010f                 		STS u_dias, R21
+000193 cf2d                      		RJMP Verificar_MODO
                                  
                                  	INC_d_dias:
-00017a 2755                      		CLR R21
-00017b 9350 010f                 		STS u_dias, R21
+000194 2755                      		CLR R21
+000195 9350 010f                 		STS u_dias, R21
                                  
-00017d 9160 0110                 		LDS R22, d_dias
-00017f 9563                      		INC R22
-000180 9360 0110                 		STS d_dias, R22
-000182 cf2b                      		RJMP Verificar_MODO
+000197 9160 0110                 		LDS R22, d_dias
+000199 9563                      		INC R22
+00019a 9360 0110                 		STS d_dias, R22
+00019c cf24                      		RJMP Verificar_MODO
                                  
                                  	V_28_DIAS: // Si estamos en febrero, el mes cambia después de 28 días
-000183 9100 010a                 		LDS R16, cnt_meses
-000185 3002                      		CPI R16, 2
-000186 f721                      		BRNE INC_u_dias_B // Si no estamos en febrero, regresamos al flujo de incremento normal
-000187 c00b                      		RJMP INC_u_meses
+00019d 9100 010a                 		LDS R16, cnt_meses
+00019f 3002                      		CPI R16, 2
+0001a0 f721                      		BRNE INC_u_dias_B // Si no estamos en febrero, regresamos al flujo de incremento normal
+0001a1 c00b                      		RJMP INC_u_meses
                                  
                                  	V_30_DIAS:
-000188 9100 010a                 		LDS R16, cnt_meses
+0001a2 9100 010a                 		LDS R16, cnt_meses
                                  
-00018a 3004                      		CPI R16, 4 // Estamos en abril?
-00018b f039                      		BREQ INC_u_meses
+0001a4 3004                      		CPI R16, 4 // Estamos en abril?
+0001a5 f039                      		BREQ INC_u_meses
                                  
-00018c 3006                      		CPI R16, 6 // Estamos en junio?
-00018d f029                      		BREQ INC_u_meses
+0001a6 3006                      		CPI R16, 6 // Estamos en junio?
+0001a7 f029                      		BREQ INC_u_meses
                                  
-00018e 3009                      		CPI R16, 9 // Estamos en septiembre?
-00018f f019                      		BREQ INC_u_meses
+0001a8 3009                      		CPI R16, 9 // Estamos en septiembre?
+0001a9 f019                      		BREQ INC_u_meses
                                  
-000190 300b                      		CPI R16, 11 // Estamos en noviembre?
-000191 f009                      		BREQ INC_u_meses
+0001aa 300b                      		CPI R16, 11 // Estamos en noviembre?
+0001ab f009                      		BREQ INC_u_meses
                                  
-000192 cfd8                      		RJMP INC_u_dias_B
+0001ac cfd8                      		RJMP INC_u_dias_B
                                  
                                  	INC_u_meses:
-000193 e011                      		LDI R17, 0x01 // Los contadores de días vuelven a empezar desde 01
-000194 9310 0109                 		STS cnt_dias, R17
-000196 9310 010f                 		STS u_dias, R17
-000198 2711                      		CLR R17
-000199 9310 0110                 		STS d_dias, R17
+0001ad e011                      		LDI R17, 0x01 // Los contadores de días vuelven a empezar desde 01
+0001ae 9310 0109                 		STS cnt_dias, R17
+0001b0 9310 010f                 		STS u_dias, R17
+0001b2 2711                      		CLR R17
+0001b3 9310 0110                 		STS d_dias, R17
                                  
-00019b 9120 010a                 		LDS R18, cnt_meses
-00019d 9523                      		INC R18
-00019e 302d                      		CPI R18, 13
-00019f f498                      		BRSH Reinicio_reloj
-0001a0 9320 010a                 		STS cnt_meses, R18
+0001b5 9120 010a                 		LDS R18, cnt_meses
+0001b7 9523                      		INC R18
+0001b8 302d                      		CPI R18, 13
+0001b9 f498                      		BRSH Reinicio_reloj
+0001ba 9320 010a                 		STS cnt_meses, R18
                                  
-0001a2 9170 0111                 		LDS R23, u_meses
-0001a4 9573                      		INC R23
-0001a5 307a                      		CPI R23, 0x0A
-0001a6 f418                      		BRSH INC_d_meses
+0001bc 9170 0111                 		LDS R23, u_meses
+0001be 9573                      		INC R23
+0001bf 307a                      		CPI R23, 0x0A
+0001c0 f418                      		BRSH INC_d_meses
                                  
-0001a7 9370 0111                 		STS u_meses, R23
-0001a9 cf04                      		RJMP Verificar_MODO
+0001c1 9370 0111                 		STS u_meses, R23
+0001c3 cefd                      		RJMP Verificar_MODO
                                  
                                  	INC_d_meses:
-0001aa 2777                      		CLR R23
-0001ab 9370 0111                 		STS u_meses, R23
+0001c4 2777                      		CLR R23
+0001c5 9370 0111                 		STS u_meses, R23
                                  
-0001ad 9180 0112                 		LDS R24, d_meses
-0001af 9583                      		INC R24
-0001b0 9380 0112                 		STS d_meses, R24
-0001b2 cefb                      		RJMP Verificar_MODO
+0001c7 9180 0112                 		LDS R24, d_meses
+0001c9 9583                      		INC R24
+0001ca 9380 0112                 		STS d_meses, R24
+0001cc cef4                      		RJMP Verificar_MODO
                                  
                                  	Reinicio_reloj:
-0001b3 e041                      		LDI R20, 0x01
-0001b4 9340 010a                 		STS cnt_meses, R20
-0001b6 9340 0111                 		STS u_meses, R20
-0001b8 2744                      		CLR R20
-0001b9 9340 0112                 		STS d_meses, R20
-0001bb cef2                      		RJMP Verificar_MODO
+0001cd e041                      		LDI R20, 0x01
+0001ce 9340 010a                 		STS cnt_meses, R20
+0001d0 9340 0111                 		STS u_meses, R20
+0001d2 2744                      		CLR R20
+0001d3 9340 0112                 		STS d_meses, R20
+0001d5 ceeb                      		RJMP Verificar_MODO
                                  
                                  // *********************************************************************************************************************************************//
                                  // Subrutinas de programa
@@ -1539,619 +1567,747 @@ C:\Users\Usuario\Documents\Atmel Studio\7.0\Laboratorio_Progra_Micros\Proyecto_r
                                  
                                  	// Interrupción para pin change en PORTB
                                  	ISR_PCINT0: 
-0001bc 930f                      		PUSH R16
-0001bd b70f                      		IN   R16, SREG
-0001be 930f                      		PUSH R16
-0001bf 931f                      		PUSH R17
-0001c0 932f                      		PUSH R18
-0001c1 933f                      		PUSH R19
-0001c2 934f                      		PUSH R20
-0001c3 935f                      		PUSH R21
-0001c4 936f                      		PUSH R22
+0001d6 930f                      		PUSH R16
+0001d7 b70f                      		IN   R16, SREG
+0001d8 930f                      		PUSH R16
+0001d9 931f                      		PUSH R17
+0001da 932f                      		PUSH R18
+0001db 933f                      		PUSH R19
+0001dc 934f                      		PUSH R20
+0001dd 935f                      		PUSH R21
+0001de 936f                      		PUSH R22
                                  
-0001c5 b113                      		IN R17, PINB // Lectura del estado actual de los botones
-0001c6 731f                      		ANDI R17, 0x3F // Máscara para solo dejar PB5-0 con valor (no editamos el LED rojo)
+0001df b113                      		IN R17, PINB // Lectura del estado actual de los botones
+0001e0 731f                      		ANDI R17, 0x3F // Máscara para solo dejar PB5-0 con valor (no editamos el LED rojo)
                                  
                                  		// Verificamos los botones 4-1 (Si actualmente son 1 [no presionado], se ignora la subrutina correspondiente)
-0001c7 9b19                      		SBIS PINB, 1
-0001c8 c017                      		RJMP BOTON_1
-0001c9 9b1a                      		SBIS PINB, 2
-0001ca c086                      		RJMP BOTON_2
-0001cb 9b1b                      		SBIS PINB, 3
-0001cc c1a5                      		RJMP BOTON_3
-0001cd 9b1c                      		SBIS PINB, 4
-0001ce c1af                      		RJMP BOTON_4
+0001e1 9b19                      		SBIS PINB, 1
+0001e2 c01e                      		RJMP BOTON_1
+0001e3 9b1a                      		SBIS PINB, 2
+0001e4 c08c                      		RJMP BOTON_2
+0001e5 9b1b                      		SBIS PINB, 3
+0001e6 c1c2                      		RJMP BOTON_3
+0001e7 9b1c                      		SBIS PINB, 4
+0001e8 c20c                      		RJMP BOTON_4
                                  
                                  		// Verificamos el botón 0 (config)
-0001cf 2f21                      		MOV R18, R17 // Copia del estado actual de los botones
-0001d0 7021                      		ANDI R18, 0x01 // Aislamos bit 0
-0001d1 3020                      		CPI R18, 0x00 // Si es igual a 0, el botón se está presionando y CONFIG debe ser 0xFF
-0001d2 f049                      		BREQ BOTON_0
+0001e9 2f21                      		MOV R18, R17 // Copia del estado actual de los botones
+0001ea 7021                      		ANDI R18, 0x01 // Aislamos bit 0
+0001eb 3020                      		CPI R18, 0x00 // Si es igual a 0, el botón se está presionando y CONFIG debe ser 0xFF
+0001ec f081                      		BREQ BOTON_0
                                  
-0001d3 e021                      		LDI R18, 0x01 // Cargamos 1 en R18
-0001d4 2733                      		CLR R19 // Cargamos 0 en R19
-0001d5 9100 0100                 		LDS R16, botones // Cargamos el estado anterior de los botones
-0001d7 7001                      		ANDI R16, 0x01 // Aislamos bit 0
-0001d8 1302                      		CPSE R16, R18 // Si son iguales (BOTON_0 = 1), el botón estaba suelto, así que no hubo flanco de subida y se ignora la siguiente línea
-0001d9 9330 0117                 		STS config, R19 // Si no son iguales (BOTON_0 = 0), el botón estaba presionado y hubo flanco de subida, se resetea la bandera de config
+0001ed 9100 0100                 		LDS R16, botones // Cargamos el estado anterior de los botones
+0001ef 7001                      		ANDI R16, 0x01 // Aislamos bit 0
+0001f0 3000                      		CPI R16, 0x00
+0001f1 f009                      		BREQ APAGAR_CONFIG // Si no esta presionado, se apaga la config
+0001f2 c216                      		RJMP EXIT_ISR_PCINT0
                                  
-0001db c1b1                      		RJMP EXIT_ISR_PCINT0
+                                 		APAGAR_CONFIG:
+0001f3 2733                      			CLR R19
+0001f4 9330 011e                 			STS config, R19 // Si no son iguales (BOTON_0 = 0), el botón estaba presionado y hubo flanco de subida, se resetea la bandera de config	
+0001f6 9120 011f                 			LDS R18, modo
+0001f8 3525                      			CPI R18, 0x55
+0001f9 f411                      			BRNE MANTENER_MODO
+0001fa 9330 011f                 			STS modo, R19 // Si no son iguales, se regresa el modo a hora para evitar entrar en alarma
+                                 			MANTENER_MODO:
+0001fc c20c                      			RJMP EXIT_ISR_PCINT0
                                  
                                  	BOTON_0:
-0001dc ef0f                      		LDI R16, 0xFF
-0001dd 9300 0117                 		STS config, R16 // Activamos configuración: config = 0xFF
-0001df c1ad                      		RJMP EXIT_ISR_PCINT0
+0001fd ef0f                      		LDI R16, 0xFF
+0001fe 9300 011e                 		STS config, R16 // Activamos configuración: config = 0xFF
+000200 c208                      		RJMP EXIT_ISR_PCINT0
                                  
                                  	BOTON_1: // Botón de incremento
-0001e0 9100 0117                 		LDS R16, config
-0001e2 3000                      		CPI R16, 0x00
-0001e3 f409                      		BRNE ACCION_B1
-0001e4 c1a8                      		RJMP EXIT_ISR_PCINT0 // Si no estamos en configuración, no tiene efecto la pulsación
+000201 9100 011e                 		LDS R16, config
+000203 3000                      		CPI R16, 0x00
+000204 f409                      		BRNE ACCION_B1
+000205 c203                      		RJMP EXIT_ISR_PCINT0 // Si no estamos en configuración, no tiene efecto la pulsación
                                  
                                  		ACCION_B1:
-0001e5 9100 0118                 		LDS R16, modo
-0001e7 3000                      		CPI R16, 0x00
-0001e8 f011                      		BREQ B1_HORA // Branch si estamos en modo hora
-0001e9 3f0f                      		CPI R16, 0xFF
-0001ea f169                      		BREQ B1_FECHA // Branch si estamos en modo fecha
+000206 9100 011f                 		LDS R16, modo
+000208 3f0f                      		CPI R16, 0xFF
+000209 f171                      		BREQ B1_FECHA // Branch si estamos en modo fecha
+                                 
+00020a c000                      		RJMP B1_HORA // Branch si estamos en modo hora
                                  
                                  		B1_HORA:
-0001eb 9110 0102                 			LDS R17, disp_config // Incrementamos el valor del display seleccionado (cambia con el B4)
+00020b 9110 0102                 			LDS R17, disp_config // Incrementamos el valor del display seleccionado (cambia con el B4)
                                  			
-0001ed 3010                      			CPI R17, 0x00
-0001ee f031                      			BREQ INC_CONFIG_U_MINUTOS // disp_config = 0 incrementa u_minutos
-0001ef 3011                      			CPI R17, 0x01
-0001f0 f051                      			BREQ INC_CONFIG_D_MINUTOS // disp_config = 1 incrementa d_minutos
-0001f1 3012                      			CPI R17, 0x02
-0001f2 f071                      			BREQ INC_CONFIG_U_HORAS // disp_config = 2 incrementa u_horas
-0001f3 3013                      			CPI R17, 0x03
-0001f4 f4b8                      			BRSH INC_CONFIG_D_HORAS // disp_config = 3 incrementa d_horas
+00020d 3010                      			CPI R17, 0x00
+00020e f031                      			BREQ INC_CONFIG_U_MINUTOS // disp_config = 0 incrementa u_minutos
+00020f 3011                      			CPI R17, 0x01
+000210 f051                      			BREQ INC_CONFIG_D_MINUTOS // disp_config = 1 incrementa d_minutos
+000211 3012                      			CPI R17, 0x02
+000212 f071                      			BREQ INC_CONFIG_U_HORAS // disp_config = 2 incrementa u_horas
+000213 3013                      			CPI R17, 0x03
+000214 f4b8                      			BRSH INC_CONFIG_D_HORAS // disp_config = 3 incrementa d_horas
                                  
                                  			INC_CONFIG_U_MINUTOS: // Aumentamos 1 minuto
-0001f5 9130 010b                 				LDS R19, u_minutos
-0001f7 9533                      				INC R19
-0001f8 9330 010b                 				STS u_minutos, R19
-0001fa c192                      				RJMP EXIT_ISR_PCINT0
+000215 9130 010b                 				LDS R19, u_minutos
+000217 9533                      				INC R19
+000218 9330 010b                 				STS u_minutos, R19
+00021a c1ee                      				RJMP EXIT_ISR_PCINT0
                                  
                                  			INC_CONFIG_D_MINUTOS: // Aumentamos 10 minutos
-0001fb 9130 010c                 				LDS R19, d_minutos
-0001fd 9533                      				INC R19
-0001fe 9330 010c                 				STS d_minutos, R19
-000200 c18c                      				RJMP EXIT_ISR_PCINT0
+00021b 9130 010c                 				LDS R19, d_minutos
+00021d 9533                      				INC R19
+00021e 9330 010c                 				STS d_minutos, R19
+000220 c1e8                      				RJMP EXIT_ISR_PCINT0
                                  
                                  			INC_CONFIG_U_HORAS: // Aumentamos 1 hora (en contador general y en el de unidades)
-000201 9130 010d                 				LDS R19, u_horas 
-000203 9533                      				INC R19
-000204 9330 010d                 				STS u_horas, R19
+000221 9130 010d                 				LDS R19, u_horas 
+000223 9533                      				INC R19
+000224 9330 010d                 				STS u_horas, R19
                                  
-000206 9140 0108                 				LDS R20, cnt_horas 
-000208 9543                      				INC R20
-000209 9340 0108                 				STS cnt_horas, R20
-00020b c181                      				RJMP EXIT_ISR_PCINT0
+000226 9140 0108                 				LDS R20, cnt_horas 
+000228 9543                      				INC R20
+000229 9340 0108                 				STS cnt_horas, R20
+00022b c1dd                      				RJMP EXIT_ISR_PCINT0
                                  
                                  			INC_CONFIG_D_HORAS: // Aumentamos 10 horas en contador general y 1 en el de decenas
-00020c 9130 010e                 				LDS R19, d_horas 
-00020e 9533                      				INC R19
-00020f 9330 010e                 				STS d_horas, R19
+00022c 9130 010e                 				LDS R19, d_horas 
+00022e 9533                      				INC R19
+00022f 9330 010e                 				STS d_horas, R19
                                  
-000211 9140 0108                 				LDS R20, cnt_horas
-000213 e05a                      				LDI R21, 0x0A 
-000214 0f45                      				ADD R20, R21
-000215 9340 0108                 				STS cnt_horas, R20
-000217 c175                      				RJMP EXIT_ISR_PCINT0
+000231 9140 0108                 				LDS R20, cnt_horas
+000233 e05a                      				LDI R21, 0x0A 
+000234 0f45                      				ADD R20, R21
+000235 9340 0108                 				STS cnt_horas, R20
+000237 c1d1                      				RJMP EXIT_ISR_PCINT0
                                  
                                  		B1_FECHA:
-000218 9110 0102                 			LDS R17, disp_config // Incrementamos el valor del display seleccionado (cambia con el B4)
+000238 9110 0102                 			LDS R17, disp_config // Incrementamos el valor del display seleccionado (cambia con el B4)
                                  			
-00021a 3010                      			CPI R17, 0x00
-00021b f031                      			BREQ INC_CONFIG_U_DIAS // disp_config = 0 incrementa u_dias
-00021c 3011                      			CPI R17, 0x01
-00021d f079                      			BREQ INC_CONFIG_D_DIAS // disp_config = 1 incrementa d_dias
-00021e 3012                      			CPI R17, 0x02
-00021f f0c9                      			BREQ INC_CONFIG_U_MESES // disp_config = 2 incrementa u_meses
-000220 3013                      			CPI R17, 0x03
-000221 f510                      			BRSH INC_CONFIG_D_MESES // disp_config = 3 incrementa d_meses
+00023a 3010                      			CPI R17, 0x00
+00023b f031                      			BREQ INC_CONFIG_U_DIAS // disp_config = 0 incrementa u_dias
+00023c 3011                      			CPI R17, 0x01
+00023d f079                      			BREQ INC_CONFIG_D_DIAS // disp_config = 1 incrementa d_dias
+00023e 3012                      			CPI R17, 0x02
+00023f f0c9                      			BREQ INC_CONFIG_U_MESES // disp_config = 2 incrementa u_meses
+000240 3013                      			CPI R17, 0x03
+000241 f510                      			BRSH INC_CONFIG_D_MESES // disp_config = 3 incrementa d_meses
                                  
                                  			INC_CONFIG_U_DIAS: // Aumentamos 1 dia (en contador general y en el de unidades)
-000222 9130 010f                 				LDS R19, u_dias
-000224 9533                      				INC R19
-000225 9330 010f                 				STS u_dias, R19
+000242 9130 010f                 				LDS R19, u_dias
+000244 9533                      				INC R19
+000245 9330 010f                 				STS u_dias, R19
                                  				
-000227 9140 0109                 				LDS R20, cnt_dias 
-000229 9543                      				INC R20
-00022a 9340 0109                 				STS cnt_dias, R20
-00022c c160                      				RJMP EXIT_ISR_PCINT0
+000247 9140 0109                 				LDS R20, cnt_dias 
+000249 9543                      				INC R20
+00024a 9340 0109                 				STS cnt_dias, R20
+00024c c1bc                      				RJMP EXIT_ISR_PCINT0
                                  
                                  			INC_CONFIG_D_DIAS: // Aumentamos 10 dias en el contador general y 1 en el de decenas
-00022d 9130 0110                 				LDS R19, d_dias
-00022f 9533                      				INC R19
-000230 9330 0110                 				STS d_dias, R19
+00024d 9130 0110                 				LDS R19, d_dias
+00024f 9533                      				INC R19
+000250 9330 0110                 				STS d_dias, R19
                                  				
-000232 9140 0109                 				LDS R20, cnt_dias
-000234 e05a                      				LDI R21, 0x0A 
-000235 0f45                      				ADD R20, R21
-000236 9340 0109                 				STS cnt_dias, R20
-000238 c154                      				RJMP EXIT_ISR_PCINT0
+000252 9140 0109                 				LDS R20, cnt_dias
+000254 e05a                      				LDI R21, 0x0A 
+000255 0f45                      				ADD R20, R21
+000256 9340 0109                 				STS cnt_dias, R20
+000258 c1b0                      				RJMP EXIT_ISR_PCINT0
                                  
                                  			INC_CONFIG_U_MESES: // Aumentamos 1 mes (en contador general y en el de unidades)
-000239 9130 0111                 				LDS R19, u_meses 
-00023b 9533                      				INC R19
-00023c 9330 0111                 				STS u_meses, R19
+000259 9130 0111                 				LDS R19, u_meses 
+00025b 9533                      				INC R19
+00025c 9330 0111                 				STS u_meses, R19
                                  
-00023e 9140 010a                 				LDS R20, cnt_meses
-000240 9543                      				INC R20
-000241 9340 010a                 				STS cnt_meses, R20
-000243 c149                      				RJMP EXIT_ISR_PCINT0
+00025e 9140 010a                 				LDS R20, cnt_meses
+000260 9543                      				INC R20
+000261 9340 010a                 				STS cnt_meses, R20
+000263 c1a5                      				RJMP EXIT_ISR_PCINT0
                                  
                                  			INC_CONFIG_D_MESES: // Aumentamos 10 meses en el contador general y 1 en el de decenas
-000244 9130 0112                 				LDS R19, d_meses
-000246 9533                      				INC R19
-000247 9330 0112                 				STS d_meses, R19
+000264 9130 0112                 				LDS R19, d_meses
+000266 9533                      				INC R19
+000267 9330 0112                 				STS d_meses, R19
                                  
-000249 9140 010a                 				LDS R20, cnt_meses
-00024b e05a                      				LDI R21, 0x0A 
-00024c 0f45                      				ADD R20, R21
-00024d 9340 010a                 				STS cnt_meses, R20
-00024f c13d                      				RJMP EXIT_ISR_PCINT0
+000269 9140 010a                 				LDS R20, cnt_meses
+00026b e05a                      				LDI R21, 0x0A 
+00026c 0f45                      				ADD R20, R21
+00026d 9340 010a                 				STS cnt_meses, R20
+00026f c199                      				RJMP EXIT_ISR_PCINT0
                                  
-000250 c13c                      		RJMP EXIT_ISR_PCINT0
+000270 c198                      		RJMP EXIT_ISR_PCINT0
                                  		
                                  	BOTON_2: // Botón de decremento
-000251 9100 0117                 		LDS R16, config
-000253 3000                      		CPI R16, 0x00
-000254 f409                      		BRNE ACCION_B2
-000255 c137                      		RJMP EXIT_ISR_PCINT0 // Si no estamos en configuración, no tiene efecto la pulsación
+000271 9100 011e                 		LDS R16, config
+000273 3000                      		CPI R16, 0x00
+000274 f409                      		BRNE ACCION_B2
+000275 c193                      		RJMP EXIT_ISR_PCINT0 // Si no estamos en configuración, no tiene efecto la pulsación
                                  
                                  		ACCION_B2:
-000256 9100 0118                 		LDS R16, modo
-000258 3000                      		CPI R16, 0x00
-000259 f009                      		BREQ B2_HORA // Branch si estamos en modo hora
+000276 9100 011f                 		LDS R16, modo
+000278 3505                      		CPI R16, 0x55
+000279 f019                      		BREQ B2_ALARMA // Branch si estamos en modo alarma
                                  
-00025a c069                      		RJMP B2_FECHA // Branch si estamos en modo fecha (no estamos en hora ni en alarma)
+00027a 3000                      		CPI R16, 0x00
+00027b f0b1                      		BREQ B2_HORA // Branch si estamos en modo hora
+                                 
+00027c c07e                      		RJMP B2_FECHA // Branch si estamos en modo fecha (no estamos en hora ni en alarma)
+                                 
+                                 		B2_ALARMA: // Guarda el valor nuevo de la alarma
+00027d 9110 010b                 			LDS R17, u_minutos // Guardamos el valor editado
+00027f 9310 0113                 			STS al_u_minutos, R17
+000281 9110 010c                 			LDS R17, d_minutos // Guardamos el valor editado
+000283 9310 0114                 			STS al_d_minutos, R17
+000285 9110 010d                 			LDS R17, u_horas // Guardamos el valor editado
+000287 9310 0115                 			STS al_u_horas, R17
+000289 9110 010e                 			LDS R17, d_horas // Guardamos el valor editado
+00028b 9310 0116                 			STS al_d_horas, R17
+00028d 9110 0108                 			LDS R17, cnt_horas // Guardamos el valor editado
+00028f 9310 0117                 			STS al_horas, R17
+000291 c177                      			RJMP EXIT_ISR_PCINT0
                                  
                                  		B2_HORA:
-00025b 9110 0102                 			LDS R17, disp_config // Decrementamos el valor del display seleccionado (cambia con el B4)
+000292 9110 0102                 			LDS R17, disp_config // Decrementamos el valor del display seleccionado (cambia con el B4)
                                  			
-00025d 3010                      			CPI R17, 0x00
-00025e f029                      			BREQ DEC_CONFIG_U_MINUTOS // disp_config = 0 decrementa u_minutos
-00025f 3011                      			CPI R17, 0x01
-000260 f079                      			BREQ DEC_CONFIG_D_MINUTOS // disp_config = 1 decrementa d_minutos
-000261 3012                      			CPI R17, 0x02
-000262 f0c9                      			BREQ DEC_CONFIG_U_HORAS // disp_config = 2 decrementa u_horas
+000294 3010                      			CPI R17, 0x00
+000295 f029                      			BREQ DEC_CONFIG_U_MINUTOS // disp_config = 0 decrementa u_minutos
+000296 3011                      			CPI R17, 0x01
+000297 f079                      			BREQ DEC_CONFIG_D_MINUTOS // disp_config = 1 decrementa d_minutos
+000298 3012                      			CPI R17, 0x02
+000299 f0c9                      			BREQ DEC_CONFIG_U_HORAS // disp_config = 2 decrementa u_horas
                                  
-000263 c047                      			RJMP DEC_CONFIG_D_HORAS // disp_config = 3 o más, decrementa d_horas
+00029a c047                      			RJMP DEC_CONFIG_D_HORAS // disp_config = 3 o más, decrementa d_horas
                                  
                                  			DEC_CONFIG_U_MINUTOS: // Regresamos 1 minuto
-000264 9130 010b                 				LDS R19, u_minutos
-000266 3030                      				CPI R19, 0x00
-000267 f421                      				BRNE PC+5 // salta LDI(1) + STS(2) + RJMP(1) = 4
-000268 e039                      				LDI R19, 0x09 // tarda 1 ciclo
-000269 9330 010b                 				STS u_minutos, R19 // tarda 2 ciclos (hay que tomarlo en cuenta)
-00026b c121                      				RJMP EXIT_ISR_PCINT0 // tarda 1 ciclo
+00029b 9130 010b                 				LDS R19, u_minutos
+00029d 3030                      				CPI R19, 0x00
+00029e f421                      				BRNE PC+5 // salta LDI(1) + STS(2) + RJMP(1) = 4
+00029f e039                      				LDI R19, 0x09 // tarda 1 ciclo
+0002a0 9330 010b                 				STS u_minutos, R19 // tarda 2 ciclos (hay que tomarlo en cuenta)
+0002a2 c166                      				RJMP EXIT_ISR_PCINT0 // tarda 1 ciclo
                                  				
-00026c 953a                      				DEC R19
-00026d 9330 010b                 				STS u_minutos, R19
-00026f c11d                      				RJMP EXIT_ISR_PCINT0
+0002a3 953a                      				DEC R19
+0002a4 9330 010b                 				STS u_minutos, R19
+0002a6 c162                      				RJMP EXIT_ISR_PCINT0
                                  
                                  			DEC_CONFIG_D_MINUTOS: // Regresamos 10 minutos
-000270 9130 010c                 				LDS R19, d_minutos
-000272 3030                      				CPI R19, 0x00
-000273 f421                      				BRNE PC+5
-000274 e035                      				LDI R19, 0x05
-000275 9330 010c                 				STS d_minutos, R19
-000277 c115                      				RJMP EXIT_ISR_PCINT0
+0002a7 9130 010c                 				LDS R19, d_minutos
+0002a9 3030                      				CPI R19, 0x00
+0002aa f421                      				BRNE PC+5
+0002ab e035                      				LDI R19, 0x05
+0002ac 9330 010c                 				STS d_minutos, R19
+0002ae c15a                      				RJMP EXIT_ISR_PCINT0
                                  				
-000278 953a                      				DEC R19
-000279 9330 010c                 				STS d_minutos, R19
-00027b c111                      				RJMP EXIT_ISR_PCINT0
+0002af 953a                      				DEC R19
+0002b0 9330 010c                 				STS d_minutos, R19
+0002b2 c156                      				RJMP EXIT_ISR_PCINT0
                                  
                                  			DEC_CONFIG_U_HORAS: // Regresamos 1 hora (en contador general y en el de unidades)
-00027c 9140 0108                 				LDS R20, cnt_horas
-00027e 3040                      				CPI R20, 0x00 // Si estamos en 00 horas, regresar a 23
-00027f f109                      				BREQ UNDERFLOW_HORAS
+0002b3 9140 0108                 				LDS R20, cnt_horas
+0002b5 3040                      				CPI R20, 0x00 // Si estamos en 00 horas, regresar a 23
+0002b6 f109                      				BREQ UNDERFLOW_HORAS
                                  				
-000280 9130 010e                 				LDS R19, d_horas
-000282 3030                      				CPI R19, 0x00 // Si las decenas de hora no son 0, verificamos si hay underflow
-000283 f021                      				BREQ PC+5 // Porque LDS tarda 2 ciclos
-000284 9120 010d                 				LDS R18, u_horas
-000286 3020                      				CPI R18, 0x00 // Si hay underflow, saltamos a UNDERFLOW_U_HORAS
-000287 f059                      				BREQ UNDERFLOW_U_HORAS
+0002b7 9130 010e                 				LDS R19, d_horas
+0002b9 3030                      				CPI R19, 0x00 // Si las decenas de hora no son 0, verificamos si hay underflow
+0002ba f021                      				BREQ PC+5 // Porque LDS tarda 2 ciclos
+0002bb 9120 010d                 				LDS R18, u_horas
+0002bd 3020                      				CPI R18, 0x00 // Si hay underflow, saltamos a UNDERFLOW_U_HORAS
+0002be f059                      				BREQ UNDERFLOW_U_HORAS
                                  				
-000288 9120 010d                 				LDS R18, u_horas // Si no hay underflow de ningún tipo, solo decrementamos las unidades y el contador
-00028a 952a                      				DEC R18
-00028b 9320 010d                 				STS u_horas, R18
-00028d 9140 0108                 				LDS R20, cnt_horas
-00028f 954a                      				DEC R20
-000290 9340 0108                 				STS cnt_horas, R20
-000292 c0fa                      				RJMP EXIT_ISR_PCINT0
+0002bf 9120 010d                 				LDS R18, u_horas // Si no hay underflow de ningún tipo, solo decrementamos las unidades y el contador
+0002c1 952a                      				DEC R18
+0002c2 9320 010d                 				STS u_horas, R18
+0002c4 9140 0108                 				LDS R20, cnt_horas
+0002c6 954a                      				DEC R20
+0002c7 9340 0108                 				STS cnt_horas, R20
+0002c9 c13f                      				RJMP EXIT_ISR_PCINT0
                                  				
                                  				UNDERFLOW_U_HORAS: // Pasamos de 10 a 09 o de 20 a 19 horas
-000293 9140 0108                 					LDS R20, cnt_horas 
-000295 954a                      					DEC R20 // Disminuye el contador general en 1
-000296 9340 0108                 					STS cnt_horas, R20
-000298 9130 010e                 					LDS R19, d_horas
-00029a 953a                      					DEC R19 // Disminuye las decenas en 1
-00029b 9330 010e                 					STS d_horas, R19
-00029d e029                      					LDI R18, 0x09 // Regresamos las unidades a 9 
-00029e 9320 010d                 					STS u_horas, R18
-0002a0 c0ec                      					RJMP EXIT_ISR_PCINT0
+0002ca 9140 0108                 					LDS R20, cnt_horas 
+0002cc 954a                      					DEC R20 // Disminuye el contador general en 1
+0002cd 9340 0108                 					STS cnt_horas, R20
+0002cf 9130 010e                 					LDS R19, d_horas
+0002d1 953a                      					DEC R19 // Disminuye las decenas en 1
+0002d2 9330 010e                 					STS d_horas, R19
+0002d4 e029                      					LDI R18, 0x09 // Regresamos las unidades a 9 
+0002d5 9320 010d                 					STS u_horas, R18
+0002d7 c131                      					RJMP EXIT_ISR_PCINT0
                                  					
                                  				UNDERFLOW_HORAS: // Pasamos de 00 a 23 horas
-0002a1 e147                      					LDI R20, 23
-0002a2 9340 0108                 					STS cnt_horas, R20 // Regresamos el contador a 23 horas
-0002a4 e032                      					LDI R19, 0x02
-0002a5 9330 010e                 					STS d_horas, R19 // Regresamos las decenas a 2
-0002a7 e033                      					LDI R19, 0X03
-0002a8 9330 010d                 					STS u_horas, R19 // Regresamos las unidades a 3
-0002aa c0e2                      					RJMP EXIT_ISR_PCINT0
+0002d8 e147                      					LDI R20, 23
+0002d9 9340 0108                 					STS cnt_horas, R20 // Regresamos el contador a 23 horas
+0002db e032                      					LDI R19, 0x02
+0002dc 9330 010e                 					STS d_horas, R19 // Regresamos las decenas a 2
+0002de e033                      					LDI R19, 0X03
+0002df 9330 010d                 					STS u_horas, R19 // Regresamos las unidades a 3
+0002e1 c127                      					RJMP EXIT_ISR_PCINT0
                                  
                                  			DEC_CONFIG_D_HORAS: // Regresamos 10 horas en contador general y 1 en el de decenas
-0002ab 9140 0108                 				LDS R20, cnt_horas
-0002ad 304a                      				CPI R20, 0x0A // Si en el contador general hay menos de 10 horas, hacemos underflow
-0002ae f058                      				BRLO UNDERFLOW_D_HORAS
+0002e2 9140 0108                 				LDS R20, cnt_horas
+0002e4 304a                      				CPI R20, 0x0A // Si en el contador general hay menos de 10 horas, hacemos underflow
+0002e5 f058                      				BRLO UNDERFLOW_D_HORAS
                                  				
-0002af 9130 010e                 				LDS R19, d_horas 
-0002b1 953a                      				DEC R19
-0002b2 9330 010e                 				STS d_horas, R19
+0002e6 9130 010e                 				LDS R19, d_horas 
+0002e8 953a                      				DEC R19
+0002e9 9330 010e                 				STS d_horas, R19
                                  
-0002b4 9140 0108                 				LDS R20, cnt_horas
-0002b6 504a                      				SUBI R20, 0x0A
-0002b7 9340 0108                 				STS cnt_horas, R20
-0002b9 c0d3                      				RJMP EXIT_ISR_PCINT0
+0002eb 9140 0108                 				LDS R20, cnt_horas
+0002ed 504a                      				SUBI R20, 0x0A
+0002ee 9340 0108                 				STS cnt_horas, R20
+0002f0 c118                      				RJMP EXIT_ISR_PCINT0
                                  				
                                  				UNDERFLOW_D_HORAS: // Pasamos a 23 horas
-0002ba e147                      					LDI R20, 23
-0002bb 9340 0108                 					STS cnt_horas, R20 // Regresamos el contador a 23 horas
-0002bd e032                      					LDI R19, 0x02
-0002be 9330 010e                 					STS d_horas, R19 // Regresamos las decenas a 2
-0002c0 e033                      					LDI R19, 0X03
-0002c1 9330 010d                 					STS u_horas, R19 // Regresamos las unidades a 3
-0002c3 c0c9                      					RJMP EXIT_ISR_PCINT0
+0002f1 e147                      					LDI R20, 23
+0002f2 9340 0108                 					STS cnt_horas, R20 // Regresamos el contador a 23 horas
+0002f4 e032                      					LDI R19, 0x02
+0002f5 9330 010e                 					STS d_horas, R19 // Regresamos las decenas a 2
+0002f7 e033                      					LDI R19, 0X03
+0002f8 9330 010d                 					STS u_horas, R19 // Regresamos las unidades a 3
+0002fa c10e                      					RJMP EXIT_ISR_PCINT0
                                  
                                  		B2_FECHA:
-0002c4 9110 0102                 			LDS R17, disp_config // Incrementamos el valor del display seleccionado (cambia con el B4)
+0002fb 9110 0102                 			LDS R17, disp_config // Incrementamos el valor del display seleccionado (cambia con el B4)
                                  			
-0002c6 3010                      			CPI R17, 0x00
-0002c7 f039                      			BREQ DEC_CONFIG_U_DIAS // disp_config = 0 decrementa u_dias
+0002fd 3010                      			CPI R17, 0x00
+0002fe f039                      			BREQ DEC_CONFIG_U_DIAS // disp_config = 0 decrementa u_dias
                                  			
-0002c8 3011                      			CPI R17, 0x01
-0002c9 f409                      			BRNE PC+2
-0002ca c055                      			RJMP DEC_CONFIG_D_DIAS // disp_config = 1 decrementa d_dias
+0002ff 3011                      			CPI R17, 0x01
+000300 f409                      			BRNE PC+2
+000301 c055                      			RJMP DEC_CONFIG_D_DIAS // disp_config = 1 decrementa d_dias
                                  			
-0002cb 3012                      			CPI R17, 0x02
-0002cc f409                      			BRNE PC+2
-0002cd c067                      			RJMP DEC_CONFIG_U_MESES // disp_config = 2 decrementa u_meses
+000302 3012                      			CPI R17, 0x02
+000303 f409                      			BRNE PC+2
+000304 c067                      			RJMP DEC_CONFIG_U_MESES // disp_config = 2 decrementa u_meses
                                  
-0002ce c08e                      			RJMP DEC_CONFIG_D_MESES // disp_config = 3+ decrementa d_meses
+000305 c08e                      			RJMP DEC_CONFIG_D_MESES // disp_config = 3+ decrementa d_meses
                                  
                                  			DEC_CONFIG_U_DIAS: // Regresamos 1 dia (en contador general y en el de unidades)
-0002cf 9140 0109                 				LDS R20, cnt_dias // Verificamos si hay que hacer underflow, regresando a la cantidad máxima de días de cada mes
-0002d1 3041                      				CPI R20, 0x01
-0002d2 f109                      				BREQ UNDERFLOW_28_DIAS
+000306 9140 0109                 				LDS R20, cnt_dias // Verificamos si hay que hacer underflow, regresando a la cantidad máxima de días de cada mes
+000308 3041                      				CPI R20, 0x01
+000309 f109                      				BREQ UNDERFLOW_28_DIAS
                                  				
-0002d3 9120 0110                 				LDS R18, d_dias
-0002d5 3020                      				CPI R18, 0x00 // Decenas en 0?
-0002d6 f021                      				BREQ PC+5 // Si las decenas están en 1, 2 o 3, verificamos si los días están en 0
-0002d7 9130 010f                 				LDS R19, u_dias
-0002d9 3030                      				CPI R19, 0x00
-0002da f059                      				BREQ UNDERFLOW_U_DIAS // Saltamos a hacer el underflow
+00030a 9120 0110                 				LDS R18, d_dias
+00030c 3020                      				CPI R18, 0x00 // Decenas en 0?
+00030d f021                      				BREQ PC+5 // Si las decenas están en 1, 2 o 3, verificamos si los días están en 0
+00030e 9130 010f                 				LDS R19, u_dias
+000310 3030                      				CPI R19, 0x00
+000311 f059                      				BREQ UNDERFLOW_U_DIAS // Saltamos a hacer el underflow
                                  
-0002db 9140 0109                 				LDS R20, cnt_dias // Si no hay que hacer underflow, solo disminuimos una unidad de día de ambos contadores
-0002dd 954a                      				DEC R20
-0002de 9340 0109                 				STS cnt_dias, R20
-0002e0 9130 010f                 				LDS R19, u_dias
-0002e2 953a                      				DEC R19
-0002e3 9330 010f                 				STS u_dias, R19
-0002e5 c0a7                      				RJMP EXIT_ISR_PCINT0
+000312 9140 0109                 				LDS R20, cnt_dias // Si no hay que hacer underflow, solo disminuimos una unidad de día de ambos contadores
+000314 954a                      				DEC R20
+000315 9340 0109                 				STS cnt_dias, R20
+000317 9130 010f                 				LDS R19, u_dias
+000319 953a                      				DEC R19
+00031a 9330 010f                 				STS u_dias, R19
+00031c c0ec                      				RJMP EXIT_ISR_PCINT0
                                  
                                  				UNDERFLOW_U_DIAS: // Pasamos de 10 a 09, 20 a 19 o 30 a 29
-0002e6 9140 0109                 					LDS R20, cnt_dias
-0002e8 954a                      					DEC R20
-0002e9 9340 0109                 					STS cnt_dias, R20 // Restamos 1 día al contador
-0002eb 9120 0110                 					LDS R18, d_dias
-0002ed 952a                      					DEC R18
-0002ee 9320 0110                 					STS d_dias, R18 // Restamos 1 a decenas de día
-0002f0 e039                      					LDI R19, 0x09
-0002f1 9330 010f                 					STS u_dias, R19 // Decenas de días a 9
-0002f3 c099                      					RJMP EXIT_ISR_PCINT0
+00031d 9140 0109                 					LDS R20, cnt_dias
+00031f 954a                      					DEC R20
+000320 9340 0109                 					STS cnt_dias, R20 // Restamos 1 día al contador
+000322 9120 0110                 					LDS R18, d_dias
+000324 952a                      					DEC R18
+000325 9320 0110                 					STS d_dias, R18 // Restamos 1 a decenas de día
+000327 e039                      					LDI R19, 0x09
+000328 9330 010f                 					STS u_dias, R19 // Decenas de días a 9
+00032a c0de                      					RJMP EXIT_ISR_PCINT0
                                  
                                  				UNDERFLOW_28_DIAS:
-0002f4 9100 010a                 					LDS R16, cnt_meses
-0002f6 3002                      					CPI R16, 0x02
-0002f7 f451                      					BRNE UNDERFLOW_31_DIAS // Si no estamos en febrero, verificamos en qué mes estamos
+00032b 9100 010a                 					LDS R16, cnt_meses
+00032d 3002                      					CPI R16, 0x02
+00032e f451                      					BRNE UNDERFLOW_31_DIAS // Si no estamos en febrero, verificamos en qué mes estamos
                                  				
-0002f8 e12c                      					LDI R18, 28 // Si estamos en febrero regresamos a 28 días
-0002f9 9320 0109                 					STS cnt_dias, R18
-0002fb e038                      					LDI R19, 0x08 // Cargamos una unidad de día
-0002fc 9330 010f                 					STS u_dias, R19
-0002fe e042                      					LDI R20, 0x02 // Cargamos 2 decenas de día
-0002ff 9340 0110                 					STS d_dias, R20
-000301 c08b                      					RJMP EXIT_ISR_PCINT0
+00032f e12c                      					LDI R18, 28 // Si estamos en febrero regresamos a 28 días
+000330 9320 0109                 					STS cnt_dias, R18
+000332 e038                      					LDI R19, 0x08 // Cargamos una unidad de día
+000333 9330 010f                 					STS u_dias, R19
+000335 e042                      					LDI R20, 0x02 // Cargamos 2 decenas de día
+000336 9340 0110                 					STS d_dias, R20
+000338 c0d0                      					RJMP EXIT_ISR_PCINT0
                                  
                                  				UNDERFLOW_31_DIAS:
-000302 9100 010a                 					LDS R16, cnt_meses // Buscamos si estamos en un mes con 30 días
-000304 3004                      					CPI R16, 0x04 // Abril
-000305 f081                      					BREQ UNDERFLOW_30_DIAS 
-000306 3006                      					CPI R16, 0x06 // Junio
-000307 f071                      					BREQ UNDERFLOW_30_DIAS 
-000308 3009                      					CPI R16, 0x09 // Septiembre
-000309 f061                      					BREQ UNDERFLOW_30_DIAS 
-00030a 300b                      					CPI R16, 0x0B // Noviembre
-00030b f051                      					BREQ UNDERFLOW_30_DIAS 
+000339 9100 010a                 					LDS R16, cnt_meses // Buscamos si estamos en un mes con 30 días
+00033b 3004                      					CPI R16, 0x04 // Abril
+00033c f081                      					BREQ UNDERFLOW_30_DIAS 
+00033d 3006                      					CPI R16, 0x06 // Junio
+00033e f071                      					BREQ UNDERFLOW_30_DIAS 
+00033f 3009                      					CPI R16, 0x09 // Septiembre
+000340 f061                      					BREQ UNDERFLOW_30_DIAS 
+000341 300b                      					CPI R16, 0x0B // Noviembre
+000342 f051                      					BREQ UNDERFLOW_30_DIAS 
                                  
-00030c e12f                      					LDI R18, 31 // Si seguimos en esta subrutina, el mes en el que estamos tiene 31 días
-00030d 9320 0109                 					STS cnt_dias, R18
-00030f e031                      					LDI R19, 0x01 // Cargamos una unidad de día
-000310 9330 010f                 					STS u_dias, R19
-000312 e043                      					LDI R20, 0x03 // Cargamos 1 decena de día
-000313 9340 0110                 					STS d_dias, R20
-000315 c077                      					RJMP EXIT_ISR_PCINT0
+000343 e12f                      					LDI R18, 31 // Si seguimos en esta subrutina, el mes en el que estamos tiene 31 días
+000344 9320 0109                 					STS cnt_dias, R18
+000346 e031                      					LDI R19, 0x01 // Cargamos una unidad de día
+000347 9330 010f                 					STS u_dias, R19
+000349 e043                      					LDI R20, 0x03 // Cargamos 1 decena de día
+00034a 9340 0110                 					STS d_dias, R20
+00034c c0bc                      					RJMP EXIT_ISR_PCINT0
                                  
                                  				UNDERFLOW_30_DIAS:
-000316 e12e                      					LDI R18, 30 // Si caemos en esta subrutina, el mes en el que estamos tiene 30 días
-000317 9320 0109                 					STS cnt_dias, R18
-000319 e030                      					LDI R19, 0x00 // Cargamos 0 como unidad de día
-00031a 9330 010f                 					STS u_dias, R19
-00031c e043                      					LDI R20, 0x03 // Cargamos 3 decenas de día
-00031d 9340 0110                 					STS d_dias, R20
-00031f c06d                      					RJMP EXIT_ISR_PCINT0
+00034d e12e                      					LDI R18, 30 // Si caemos en esta subrutina, el mes en el que estamos tiene 30 días
+00034e 9320 0109                 					STS cnt_dias, R18
+000350 e030                      					LDI R19, 0x00 // Cargamos 0 como unidad de día
+000351 9330 010f                 					STS u_dias, R19
+000353 e043                      					LDI R20, 0x03 // Cargamos 3 decenas de día
+000354 9340 0110                 					STS d_dias, R20
+000356 c0b2                      					RJMP EXIT_ISR_PCINT0
                                  			
                                  			DEC_CONFIG_D_DIAS: // Restamos 10 días a los contadores
-000320 9120 0110                 					LDS R18, d_dias
-000322 e05a                      					LDI R21, 0x0A
-000323 9f25                      					MUL R18, R21    
-000324 9130 010f                 					LDS R19, u_dias
-000326 0e03                      					ADD R0, R19 // cnt_dias = d_dias*10 + u_dias
-000327 2d20                      					MOV R18, R0
-000328 9320 0109                 					STS cnt_dias, R18
+000357 9120 0110                 					LDS R18, d_dias
+000359 e05a                      					LDI R21, 0x0A
+00035a 9f25                      					MUL R18, R21    
+00035b 9130 010f                 					LDS R19, u_dias
+00035d 0e03                      					ADD R0, R19 // cnt_dias = d_dias*10 + u_dias
+00035e 2d20                      					MOV R18, R0
+00035f 9320 0109                 					STS cnt_dias, R18
                                  
-00032a 302b                      					CPI R18, 0x0B
-00032b f240                      					BRLO UNDERFLOW_28_DIAS // Si el contador de días es igual o menor a 10 y restamos 10, cargamos los días máximos del mes correspondiente
-00032c 502a                      					SUBI R18, 0x0A
-00032d 9320 0109                 					STS cnt_dias, R18
-00032f 9130 0110                 					LDS R19, d_dias
-000331 953a                      					DEC R19
-000332 9330 0110                 					STS d_dias, R19
-000334 c058                      					RJMP EXIT_ISR_PCINT0
+000361 302b                      					CPI R18, 0x0B
+000362 f240                      					BRLO UNDERFLOW_28_DIAS // Si el contador de días es igual o menor a 10 y restamos 10, cargamos los días máximos del mes correspondiente
+000363 502a                      					SUBI R18, 0x0A
+000364 9320 0109                 					STS cnt_dias, R18
+000366 9130 0110                 					LDS R19, d_dias
+000368 953a                      					DEC R19
+000369 9330 0110                 					STS d_dias, R19
+00036b c09d                      					RJMP EXIT_ISR_PCINT0
                                  
                                  			DEC_CONFIG_U_MESES:
-000335 9120 0112                 				LDS R18, d_meses //cnt_meses = d_meses*10 + u_meses
-000337 e05a                      				LDI R21, 0x0A
-000338 9f25                      				MUL R18, R21      
-000339 9130 0111                 				LDS R19, u_meses
-00033b 0e03                      				ADD R0, R19
-00033c 2d20                      				MOV R18, R0
-00033d 9320 010a                 				STS cnt_meses, R18  
+00036c 9120 0112                 				LDS R18, d_meses //cnt_meses = d_meses*10 + u_meses
+00036e e05a                      				LDI R21, 0x0A
+00036f 9f25                      				MUL R18, R21      
+000370 9130 0111                 				LDS R19, u_meses
+000372 0e03                      				ADD R0, R19
+000373 2d20                      				MOV R18, R0
+000374 9320 010a                 				STS cnt_meses, R18  
                                  
-00033f 3021                      				CPI R18, 0x01
-000340 f091                      				BREQ UNDERFLOW_MESES
-000341 952a                      				DEC R18
-000342 9320 010a                 				STS cnt_meses, R18
-000344 9130 0111                 				LDS R19, u_meses
-000346 953a                      				DEC R19
-000347 3f3f                      				CPI R19, 0xFF // Verificamos si hubo underflow
-000348 f019                      				BREQ UNDERFLOW_D_MESES
-000349 9330 0111                 				STS u_meses, R19
-00034b c041                      				RJMP EXIT_ISR_PCINT0
+000376 3021                      				CPI R18, 0x01
+000377 f091                      				BREQ UNDERFLOW_MESES
+000378 952a                      				DEC R18
+000379 9320 010a                 				STS cnt_meses, R18
+00037b 9130 0111                 				LDS R19, u_meses
+00037d 953a                      				DEC R19
+00037e 3f3f                      				CPI R19, 0xFF // Verificamos si hubo underflow
+00037f f019                      				BREQ UNDERFLOW_D_MESES
+000380 9330 0111                 				STS u_meses, R19
+000382 c086                      				RJMP EXIT_ISR_PCINT0
                                  				
                                  				UNDERFLOW_D_MESES: // Pasamos de 10 a 09
-00034c e039                      					LDI R19, 0x09
-00034d 9330 0111                 					STS u_meses, R19
-00034f 2744                      					CLR R20
-000350 9340 0112                 					STS d_meses, R20
-000352 c03a                      					RJMP EXIT_ISR_PCINT0
+000383 e039                      					LDI R19, 0x09
+000384 9330 0111                 					STS u_meses, R19
+000386 2744                      					CLR R20
+000387 9340 0112                 					STS d_meses, R20
+000389 c07f                      					RJMP EXIT_ISR_PCINT0
                                  
                                  				UNDERFLOW_MESES: // Cargamos diciembre
-000353 e02c                      					LDI R18, 12
-000354 9320 010a                 					STS cnt_meses, R18 // Contador a 12
-000356 e032                      					LDI R19, 0x02
-000357 9330 0111                 					STS u_meses, R19 // Unidades a 2
-000359 e041                      					LDI R20, 0x01
-00035a 9340 0112                 					STS d_meses, R20 // Decenas a 1
-00035c c030                      					RJMP EXIT_ISR_PCINT0
+00038a e02c                      					LDI R18, 12
+00038b 9320 010a                 					STS cnt_meses, R18 // Contador a 12
+00038d e032                      					LDI R19, 0x02
+00038e 9330 0111                 					STS u_meses, R19 // Unidades a 2
+000390 e041                      					LDI R20, 0x01
+000391 9340 0112                 					STS d_meses, R20 // Decenas a 1
+000393 c075                      					RJMP EXIT_ISR_PCINT0
                                  
                                  			DEC_CONFIG_D_MESES:
-00035d 9120 0112                 				LDS R18, d_meses // cnt_meses = d_meses*10 + u_meses
-00035f e05a                      				LDI R21, 0x0A
-000360 9f25                      				MUL R18, R21
-000361 9130 0111                 				LDS R19, u_meses
-000363 0e03                      				ADD R0, R19
-000364 2d20                      				MOV R18, R0
-000365 9320 010a                 				STS cnt_meses, R18
+000394 9120 0112                 				LDS R18, d_meses // cnt_meses = d_meses*10 + u_meses
+000396 e05a                      				LDI R21, 0x0A
+000397 9f25                      				MUL R18, R21
+000398 9130 0111                 				LDS R19, u_meses
+00039a 0e03                      				ADD R0, R19
+00039b 2d20                      				MOV R18, R0
+00039c 9320 010a                 				STS cnt_meses, R18
                                  
-000367 302b                      				CPI R18, 0x0B
-000368 f350                      				BRLO UNDERFLOW_MESES // Si el valor del contador era igual o menor a 10 y restamos 10, cargamos diciembre
-000369 502a                      				SUBI R18, 0x0A
-00036a 9320 010a                 				STS cnt_meses, R18
-00036c 9130 0112                 				LDS R19, d_meses
-00036e 953a                      				DEC R19
-00036f 9330 0112                 				STS d_meses, R19
-000371 c01b                      				RJMP EXIT_ISR_PCINT0
+00039e 302b                      				CPI R18, 0x0B
+00039f f350                      				BRLO UNDERFLOW_MESES // Si el valor del contador era igual o menor a 10 y restamos 10, cargamos diciembre
+0003a0 502a                      				SUBI R18, 0x0A
+0003a1 9320 010a                 				STS cnt_meses, R18
+0003a3 9130 0112                 				LDS R19, d_meses
+0003a5 953a                      				DEC R19
+0003a6 9330 0112                 				STS d_meses, R19
+0003a8 c060                      				RJMP EXIT_ISR_PCINT0
                                  
                                  	BOTON_3: // Botón de cambio de modo
-000372 9130 0118                 		LDS R19, modo
-000374 3030                      		CPI R19, 0x00
-000375 f421                      		BRNE BOTON_3A
-000376 ef3f                      		LDI R19, 0xFF
-000377 9330 0118                 		STS modo, R19
-000379 c013                      		RJMP EXIT_ISR_PCINT0
+0003a9 9110 011e                 		LDS R17, config
+0003ab 3f1f                      		CPI R17, 0xFF
+0003ac f091                      		BREQ B3_CONFIG // Si estamos en config = 0xFF, se hace esta secuencia: hora -> fecha -> alarma
+                                 		
+0003ad 9130 011f                 		LDS R19, modo
+0003af 3030                      		CPI R19, 0x00 // Estamos en hora
+0003b0 f051                      		BREQ BOTON_3B
+0003b1 3f3f                      		CPI R19, 0xFF // Estamos en fecha
+0003b2 f021                      		BREQ BOTON_3A
                                  
-                                 		BOTON_3A: // Reset de modo
-00037a e030                      			LDI R19, 0x00
-00037b 9330 0118                 			STS modo, R19
-00037d c00f                      			RJMP EXIT_ISR_PCINT0
-                                 	
-                                 	BOTON_4: // Botón para cambiar de display que se está configurando
-00037e 9150 0117                 		LDS R21, config // revisamos si estamos en CONFIG desactivada
-000380 3050                      		CPI R21, 0x00
-000381 f059                      		BREQ EXIT_ISR_PCINT0 // Si es así, nos vamos
+0003b3 e030                      		LDI R19, 0x00 // Si estamos en alarma sonando, pasamos a hora y la desactivamos 
+0003b4 9330 011f                 		STS modo, R19
+0003b6 c052                      		RJMP EXIT_ISR_PCINT0
                                  
-000382 9160 0102                 		LDS R22, disp_config // Qué display estamos configurando?
-000384 9563                      		INC R22 // Pasamos al siguiente display
-000385 9360 0102                 		STS disp_config, R22 // Guardamos el nuevo valor
+                                 		BOTON_3A: // Pasar a hora (0)
+0003b7 e030                      			LDI R19, 0x00
+0003b8 9330 011f                 			STS modo, R19
+0003ba c04e                      			RJMP EXIT_ISR_PCINT0
+                                 
+                                 		BOTON_3B: // Pasar a fecha
+0003bb ef3f                      			LDI R19, 0xFF
+0003bc 9330 011f                 			STS modo, R19
+0003be c04a                      			RJMP EXIT_ISR_PCINT0
+                                 
+                                 		B3_CONFIG:
+0003bf 9130 011f                 			LDS R19, modo
+0003c1 3f3f                      			CPI R19, 0xFF // Estamos en fecha
+0003c2 f0d1                      			BREQ BOTON_3C 
+                                 
+0003c3 3030                      			CPI R19, 0x00 // Estamos en hora
+0003c4 f3b1                      			BREQ BOTON_3B
+                                 
+0003c5 e030                      			LDI R19, 0x00 // Pasamos a hora si estábamos en alarma
+0003c6 9330 011f                 			STS modo, R19
+                                 
+                                 			// Si estábamos en alarma, guardamos los valores previos de hora
+0003c8 9110 0118                 			LDS R17, backup_u_minutos
+0003ca 9310 010b                 			STS u_minutos, R17
+0003cc 9110 0119                 			LDS R17, backup_d_minutos
+0003ce 9310 010c                 			STS d_minutos, R17
+                                 
+0003d0 9110 011a                 			LDS R17, backup_u_horas
+0003d2 9310 010d                 			STS u_horas, R17
+0003d4 9110 011b                 			LDS R17, backup_d_horas
+0003d6 9310 010e                 			STS d_horas, R17
+0003d8 9110 011c                 			LDS R17, backup_horas
+0003da 9310 0108                 			STS cnt_horas, R17
+0003dc c02c                      			RJMP EXIT_ISR_PCINT0
+                                 
+                                 		BOTON_3C: // Pasar a configurar alarma
+0003dd e535                      			LDI R19, 0x55
+0003de 9330 011f                 			STS modo, R19
+                                 			
+0003e0 9110 010b                 			LDS R17, u_minutos // Copia de seguridad de minutos
+0003e2 9310 0118                 			STS backup_u_minutos, R17
+                                 
+0003e4 9110 010c                 			LDS R17, d_minutos // Copia de seguridad de minutos
+0003e6 9310 0119                 			STS backup_d_minutos, R17
+                                 
+0003e8 9110 010d                 			LDS R17, u_horas
+0003ea 9310 011a                 			STS backup_u_horas, R17
+0003ec 9110 010e                 			LDS R17, d_horas
+0003ee 9310 011b                 			STS backup_d_horas, R17
+0003f0 9110 0108                 			LDS R17, cnt_horas // Copia de seguridad de horas
+0003f2 9310 011c                 			STS backup_horas, R17
+                                 
+0003f4 c014                      			RJMP EXIT_ISR_PCINT0
+                                 				
+                                 	BOTON_4: // Botón para cambiar de display que se está configurando / apagar alarma
+0003f5 9150 011e                 		LDS R21, config // revisamos si estamos en CONFIG desactivada
+0003f7 3050                      		CPI R21, 0x00
+0003f8 f059                      		BREQ B4_ALARMA // Si es así, nos vamos
+                                 
+0003f9 9160 0102                 		LDS R22, disp_config // Qué display estamos configurando?
+0003fb 9563                      		INC R22 // Pasamos al siguiente display
+0003fc 9360 0102                 		STS disp_config, R22 // Guardamos el nuevo valor
                                  	
-000387 3064                      		CPI R22, 0x04 
-000388 f421                      		BRNE EXIT_ISR_PCINT0
-000389 2766                      		CLR R22
-00038a 9360 0102                 		STS disp_config, R22 // Si pasamos de 3, regresamos a 0
-00038c c000                      		RJMP EXIT_ISR_PCINT0
+0003fe 3064                      		CPI R22, 0x04 
+0003ff f449                      		BRNE EXIT_ISR_PCINT0
+000400 2766                      		CLR R22
+000401 9360 0102                 		STS disp_config, R22 // Si pasamos de 3, regresamos a 0
+000403 c005                      		RJMP EXIT_ISR_PCINT0
+                                 
+                                 		B4_ALARMA:
+000404 e000                      			LDI R16, 0x00
+000405 9300 011d                 			STS flag_alarma, R16
+000407 985f                      			CBI PORTD, PORTD7
+000408 c000                      			RJMP EXIT_ISR_PCINT0
                                  
                                  	EXIT_ISR_PCINT0:
-00038d 9310 0100                 		STS botones, R17 // Guardamos la lectura realizada como nueva lectura de botones
-00038f 916f                      		POP R22
-000390 915f                      		POP R21
-000391 914f                      		POP R20
-000392 913f                      		POP R19
-000393 912f                      		POP R18
-000394 911f                      		POP R17
-000395 910f                      		POP R16
-000396 bf0f                      		OUT SREG, R16
-000397 910f                      		POP R16
-000398 9518                      		RETI
+000409 9310 0100                 		STS botones, R17 // Guardamos la lectura realizada como nueva lectura de botones
+00040b 916f                      		POP R22
+00040c 915f                      		POP R21
+00040d 914f                      		POP R20
+00040e 913f                      		POP R19
+00040f 912f                      		POP R18
+000410 911f                      		POP R17
+000411 910f                      		POP R16
+000412 bf0f                      		OUT SREG, R16
+000413 910f                      		POP R16
+000414 9518                      		RETI
                                  
                                  	// -------------------------------------------------------------------------------------------------------------------------------------------
                                  	// Interrupción de timer2
                                  	ISR_timer2:
-000399 930f                      		PUSH R16
-00039a b70f                      		IN   R16, SREG
-00039b 930f                      		PUSH R16
-00039c 931f                      		PUSH R17
-00039d 932f                      		PUSH R18
-00039e 933f                      		PUSH R19
+000415 930f                      		PUSH R16
+000416 b70f                      		IN   R16, SREG
+000417 930f                      		PUSH R16
+000418 931f                      		PUSH R17
+000419 932f                      		PUSH R18
+00041a 933f                      		PUSH R19
                                  
-00039f ef0a                      		LDI R16, 250 // Empezamos a contar en 250
-0003a0 9300 00b2                 		STS TCNT2, R16
+00041b ef0e                      		LDI R16, 254 // Empezamos a contar en 254
+00041c 9300 00b2                 		STS TCNT2, R16
                                  
-0003a2 b118                      		IN R17, PORTC
-0003a3 7013                      		ANDI R17, 0b0000_0011 // No modificamos el valor de las LEDs
-0003a4 b918                      		OUT PORTC, R17 // Displays apagados por un instante
+00041e b118                      		IN R17, PORTC
+00041f 7013                      		ANDI R17, 0b0000_0011 // No modificamos el valor de las LEDs
+000420 b918                      		OUT PORTC, R17 // Displays apagados por un instante
                                  
-0003a5 9120 0101                 		LDS R18, disp_activo
-0003a7 3020                      		CPI R18, 0x00
-0003a8 f031                      		BREQ show_dispd2
-0003a9 3021                      		CPI R18, 0x01
-0003aa f051                      		BREQ show_dispd1
-0003ab 3022                      		CPI R18, 0x02
-0003ac f071                      		BREQ show_dispi2
-0003ad 3023                      		CPI R18, 0x03
-0003ae f091                      		BREQ show_dispi1
+000421 9100 011d                 		LDS R16, flag_alarma // Verificamos si hay que encender la alarma
+000423 3f0f                      		CPI R16, 0xFF
+000424 f421                      		BRNE CONTINUAR_MUX // Si hay que encenderla, seguimos
+                                 
+000425 b11b                      		IN   R17, PORTD
+000426 e800                      		LDI  R16, (1<<PD7)
+000427 2710                      		EOR  R17, R16 // XOR para hacer toggle del valor del PD7
+000428 b91b                      		OUT  PORTD, R17
+                                 
+                                 		CONTINUAR_MUX:
+000429 9120 0101                 		LDS R18, disp_activo
+00042b 3020                      		CPI R18, 0x00
+00042c f031                      		BREQ show_dispd2
+00042d 3021                      		CPI R18, 0x01
+00042e f069                      		BREQ show_dispd1
+00042f 3022                      		CPI R18, 0x02
+000430 f0a1                      		BREQ show_dispi2
+000431 3023                      		CPI R18, 0x03
+000432 f0d9                      		BREQ show_dispi1
                                  
                                  	show_dispd2:
-0003af 9523                      		INC R18
-0003b0 9110 0106                 		LDS R17, disp_d2
-0003b2 b91b                      		OUT PORTD, R17
-0003b3 9a44                      		SBI PORTC, 4
-0003b4 c012                      		RJMP RETURN_ISR_timer2
+000433 9523                      		INC R18 // Cambiar de display activo en el próximo ciclo
+000434 9110 0106                 		LDS R17, disp_d2 // Guardar el HEX del número que se va a mostrar (PD6-0)
+000436 b13b                      		IN R19, PORTD // Guardamos el valor actual del PORTD
+000437 7830                      		ANDI R19, 0b1000_0000 // Aislamos el valor del PD7 (buzzer)
+000438 2b13                      		OR R17, R19 // OR de ambos registros para no modificar el estado del buzzer
+000439 b91b                      		OUT PORTD, R17 // Mostrar el valor del número
+00043a 9a44                      		SBI PORTC, 4 // Habilitar el display en cuestión
+00043b c01b                      		RJMP RETURN_ISR_timer2
                                  	
                                  	show_dispd1:
-0003b5 9523                      		INC R18
-0003b6 9110 0105                 		LDS R17, disp_d1
-0003b8 b91b                      		OUT PORTD, R17
-0003b9 9a45                      		SBI PORTC, 5
-0003ba c00c                      		RJMP RETURN_ISR_timer2
+00043c 9523                      		INC R18
+00043d 9110 0105                 		LDS R17, disp_d1
+00043f b13b                      		IN R19, PORTD
+000440 7830                      		ANDI R19, 0b1000_0000
+000441 2b13                      		OR R17, R19
+000442 b91b                      		OUT PORTD, R17
+000443 9a45                      		SBI PORTC, 5
+000444 c012                      		RJMP RETURN_ISR_timer2
                                  	
                                  	show_dispi2:
-0003bb 9523                      		INC R18
-0003bc 9110 0104                 		LDS R17, disp_i2
-0003be b91b                      		OUT PORTD, R17
-0003bf 9a43                      		SBI PORTC, 3
-0003c0 c006                      		RJMP RETURN_ISR_timer2
+000445 9523                      		INC R18
+000446 9110 0104                 		LDS R17, disp_i2
+000448 b13b                      		IN R19, PORTD
+000449 7830                      		ANDI R19, 0b1000_0000
+00044a 2b13                      		OR R17, R19
+00044b b91b                      		OUT PORTD, R17
+00044c 9a43                      		SBI PORTC, 3
+00044d c009                      		RJMP RETURN_ISR_timer2
                                  	
                                  	show_dispi1:
-0003c1 2722                      		CLR R18
-0003c2 9110 0103                 		LDS R17, disp_i1
-0003c4 b91b                      		OUT PORTD, R17
-0003c5 9a42                      		SBI PORTC, 2
-0003c6 c000                      		RJMP RETURN_ISR_timer2
+00044e 2722                      		CLR R18
+00044f 9110 0103                 		LDS R17, disp_i1
+000451 b13b                      		IN R19, PORTD
+000452 7830                      		ANDI R19, 0b1000_0000
+000453 2b13                      		OR R17, R19
+000454 b91b                      		OUT PORTD, R17
+000455 9a42                      		SBI PORTC, 2
+000456 c000                      		RJMP RETURN_ISR_timer2
                                  
                                  	RETURN_ISR_timer2:
-0003c7 9320 0101                 		STS disp_activo, R18
-0003c9 913f                      		POP R19
-0003ca 912f                      		POP R18
-0003cb 911f                      		POP R17
-0003cc 910f                      		POP R16
-0003cd bf0f                      		OUT SREG, R16
-0003ce 910f                      		POP R16
-0003cf 9518                      		RETI
+000457 9320 0101                 		STS disp_activo, R18
+000459 913f                      		POP R19
+00045a 912f                      		POP R18
+00045b 911f                      		POP R17
+00045c 910f                      		POP R16
+00045d bf0f                      		OUT SREG, R16
+00045e 910f                      		POP R16
+00045f 9518                      		RETI
                                  
                                  	// -------------------------------------------------------------------------------------------------------------------------------------------
                                  	ISR_timer1:
-0003d0 930f                      		PUSH R16
-0003d1 b70f                      		IN   R16, SREG
-0003d2 930f                      		PUSH R16
-0003d3 931f                      		PUSH R17
-0003d4 932f                      		PUSH R18
+000460 930f                      		PUSH R16
+000461 b70f                      		IN   R16, SREG
+000462 930f                      		PUSH R16
+000463 931f                      		PUSH R17
+000464 932f                      		PUSH R18
                                  
-0003d5 e10b                      		LDI R16, 0x1B
-0003d6 9300 0085                 		STS TCNT1H, R16 // Valor inicial H para 60s
-0003d8 e10e                      		LDI R16, 0x1E
-0003d9 9300 0084                 		STS TCNT1L, R16 // Valor inicial L para 60s
+000465 e10b                      		LDI R16, 0x1B
+000466 9300 0085                 		STS TCNT1H, R16 // Valor inicial H para 60s
+000468 e10e                      		LDI R16, 0x1E
+000469 9300 0084                 		STS TCNT1L, R16 // Valor inicial L para 60s
                                  
-0003db 9100 0117                 		LDS R16, config // Si estamos en modo configuración, no incrementamos el contador de minutos
-0003dd 3f0f                      		CPI R16, 0xFF
-0003de f031                      		BREQ RETURN_ISR_timer1
+00046b 9100 011e                 		LDS R16, config // Si estamos en modo configuración, no incrementamos el contador de minutos
+00046d 3f0f                      		CPI R16, 0xFF
+00046e f0e1                      		BREQ RETURN_ISR_timer1
                                  
-0003df 9110 010b                 		LDS R17, u_minutos // Cargamos el valor de unidades de minuto
-0003e1 9513                      		INC R17 // Incrementamos el valor de unidades de minuto
-0003e2 9310 010b                 		STS u_minutos, R17 // Guardamos el nuevo valor
-0003e4 c000                      		RJMP RETURN_ISR_timer1
+00046f 9110 010b                 		LDS R17, u_minutos // Cargamos el valor de unidades de minuto
+000471 9513                      		INC R17 // Incrementamos el valor de unidades de minuto
+000472 9310 010b                 		STS u_minutos, R17 // Guardamos el nuevo valor
+                                 
+                                 		// Verificamos si se debe activar la alarma
+000474 9110 010b                 		LDS R17, u_minutos
+000476 9120 0113                 		LDS R18, al_u_minutos
+000478 1712                      		CP R17, R18
+000479 f489                      		BRNE RETURN_ISR_timer1
+                                 
+00047a 9110 010c                 		LDS R17, d_minutos
+00047c 9120 0114                 		LDS R18, al_d_minutos
+00047e 1712                      		CP R17, R18
+00047f f459                      		BRNE RETURN_ISR_timer1
+                                 
+000480 9110 0108                 		LDS R17, cnt_horas
+000482 9120 0117                 		LDS R18, al_horas
+000484 1712                      		CP R17, R18
+000485 f429                      		BRNE RETURN_ISR_timer1
+                                 
+000486 ef2f                      		LDI R18, 0xFF
+000487 9320 011d                 		STS flag_alarma, R18 // Si llegamos a esta línea, se debe activar la alarma 
+000489 9a5f                      		SBI PORTD, PORTD7
+                                 
+00048a c000                      		RJMP RETURN_ISR_timer1
                                  
                                  	RETURN_ISR_timer1:
-0003e5 912f                      		POP R18
-0003e6 911f                      		POP R17
-0003e7 910f                      		POP R16
-0003e8 bf0f                      		OUT SREG, R16
-0003e9 910f                      		POP R16
-0003ea 9518                      		RETI
+00048b 912f                      		POP R18
+00048c 911f                      		POP R17
+00048d 910f                      		POP R16
+00048e bf0f                      		OUT SREG, R16
+00048f 910f                      		POP R16
+000490 9518                      		RETI
                                  
                                  	// -------------------------------------------------------------------------------------------------------------------------------------------
                                  	// Interrupción por timer0
                                  	ISR_timer0:
-0003eb 930f                      		PUSH R16
-0003ec b70f                      		IN   R16, SREG
-0003ed 930f                      		PUSH R16
-0003ee 931f                      		PUSH R17
-0003ef 932f                      		PUSH R18
-0003f0 933f                      		PUSH R19
-0003f1 934f                      		PUSH R20
+000491 930f                      		PUSH R16
+000492 b70f                      		IN   R16, SREG
+000493 930f                      		PUSH R16
+000494 931f                      		PUSH R17
+000495 932f                      		PUSH R18
+000496 933f                      		PUSH R19
+000497 934f                      		PUSH R20
                                  		
-0003f2 e00c                      		LDI R16, 12 // Empezamos a contar en 12
-0003f3 bd06                      		OUT TCNT0, R16
+000498 e00c                      		LDI R16, 12 // Empezamos a contar en 12
+000499 bd06                      		OUT TCNT0, R16
                                  
-0003f4 9100 0117                 		LDS R16, config
-0003f6 3f0f                      		CPI R16, 0xFF
-0003f7 f061                      		BREQ RETURN_ISR_timer0
+00049a 9100 011e                 		LDS R16, config
+00049c 3f0f                      		CPI R16, 0xFF
+00049d f061                      		BREQ RETURN_ISR_timer0
                                  
-0003f8 9110 0107                 		LDS R17, cnt_LEDR
-0003fa 9513                      		INC R17
-0003fb 9310 0107                 		STS cnt_LEDR, R17
-0003fd 3012                      		CPI R17, 2
-0003fe f429                      		BRNE RETURN_ISR_timer0
+00049e 9110 0107                 		LDS R17, cnt_LEDR
+0004a0 9513                      		INC R17
+0004a1 9310 0107                 		STS cnt_LEDR, R17
+0004a3 3012                      		CPI R17, 2
+0004a4 f429                      		BRNE RETURN_ISR_timer0
                                  		
-0003ff 2711                      		CLR R17
-000400 9310 0107                 		STS cnt_LEDR, R17
-000402 9a1d                      		SBI PINB, PINB5
+0004a5 2711                      		CLR R17
+0004a6 9310 0107                 		STS cnt_LEDR, R17
+0004a8 9a1d                      		SBI PINB, PINB5
                                  
-000403 c000                      		RJMP RETURN_ISR_timer0
+0004a9 c000                      		RJMP RETURN_ISR_timer0
                                  
                                  	RETURN_ISR_timer0:		
-000404 914f                      		POP R20
-000405 913f                      		POP R19
-000406 912f                      		POP R18
-000407 911f                      		POP R17
-000408 910f                      		POP R16
-000409 bf0f                      		OUT SREG, R16
-00040a 910f                      		POP R16
-00040b 9518                      		RETI 
+0004aa 914f                      		POP R20
+0004ab 913f                      		POP R19
+0004ac 912f                      		POP R18
+0004ad 911f                      		POP R17
+0004ae 910f                      		POP R16
+0004af bf0f                      		OUT SREG, R16
+0004b0 910f                      		POP R16
+0004b1 9518                      		RETI 
                                  	
                                  // *********************************************************************************************************************************************//
                                  // Tablas de datos
                                  
                                  	Table_7seg: // Símbolos del 0 al 9
-00040c 4277
-00040d 6b6d
-00040e 3b5a
-00040f 623f
+0004b2 4277
+0004b3 6b6d
+0004b4 3b5a
+0004b5 623f
 
 
 RESOURCE USE INFORMATION
@@ -2171,38 +2327,38 @@ counted separately from r26..r31 here.
 "ATmega328P" register use summary:
 x  :   0 y  :   0 z  :  10 r0 :   6 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
 r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 
-r13:   0 r14:   0 r15:   0 r16: 175 r17:  93 r18:  81 r19: 108 r20:  66 
-r21:  25 r22:  16 r23:   9 r24:   4 r25:   0 r26:   0 r27:   0 r28:   0 
-r29:   0 r30:  17 r31:   9 
-Registers used: 13 out of 35 (37.1%)
+r13:   0 r14:   0 r15:   0 r16: 191 r17: 138 r18:  89 r19: 131 r20:  66 
+r21:  26 r22:  16 r23:   9 r24:   4 r25:   0 r26:   0 r27:   0 r28:   1 
+r29:   1 r30:  18 r31:   9 
+Registers used: 15 out of 35 (42.9%)
 
 "ATmega328P" instruction use summary:
 .lds  :   0 .sts  :   0 adc   :   0 add   :  14 adiw  :   0 and   :   0 
-andi  :   4 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
-brcc  :   0 brcs  :   0 break :   0 breq  :  37 brge  :   0 brhc  :   0 
+andi  :   8 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
+brcc  :   0 brcs  :   0 break :   0 breq  :  44 brge  :   0 brhc  :   0 
 brhs  :   0 brid  :   0 brie  :   0 brlo  :  13 brlt  :   0 brmi  :   0 
-brne  :  15 brpl  :   0 brsh  :  12 brtc  :   0 brts  :   0 brvc  :   0 
-brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   2 cbr   :   1 
-clc   :   0 clh   :   0 cli   :   1 cln   :   0 clr   :  24 cls   :   0 
-clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   0 cpc   :   0 
-cpi   :  77 cpse  :   1 dec   :  15 eor   :   0 fmul  :   0 fmuls :   0 
-fmulsu:   0 icall :   0 ijmp  :   0 in    :   6 inc   :  27 jmp   :   0 
-ld    :   0 ldd   :   0 ldi   :  86 lds   :  98 lpm   :  20 lsl   :   0 
+brne  :  19 brpl  :   0 brsh  :  12 brtc  :   0 brts  :   0 brvc  :   0 
+brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   3 cbr   :   1 
+clc   :   0 clh   :   0 cli   :   1 cln   :   0 clr   :  28 cls   :   0 
+clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   3 cpc   :   0 
+cpi   :  85 cpse  :   0 dec   :  15 eor   :   1 fmul  :   0 fmuls :   0 
+fmulsu:   0 icall :   0 ijmp  :   0 in    :  11 inc   :  27 jmp   :   0 
+ld    :   0 ldd   :   0 ldi   :  92 lds   : 124 lpm   :  20 lsl   :   0 
 lsr   :   0 mov   :   4 movw  :   0 mul   :   3 muls  :   0 mulsu :   0 
-neg   :   0 nop   :   0 or    :   0 ori   :   0 out   :  21 pop   :  23 
-push  :  23 rcall :   0 ret   :   0 reti  :   4 rjmp  :  80 rol   :   0 
-ror   :   0 sbc   :   0 sbci  :   0 sbi   :   7 sbic  :   0 sbis  :   4 
+neg   :   0 nop   :   0 or    :   4 ori   :   0 out   :  22 pop   :  23 
+push  :  23 rcall :   0 ret   :   0 reti  :   4 rjmp  :  88 rol   :   0 
+ror   :   0 sbc   :   0 sbci  :   0 sbi   :  10 sbic  :   0 sbis  :   4 
 sbiw  :   0 sbr   :   0 sbrc  :   0 sbrs  :   0 sec   :   0 seh   :   0 
 sei   :   1 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
-sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 sts   : 147 
+sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 sts   : 175 
 sub   :   0 subi  :   3 swap  :   0 tst   :   0 wdr   :   0 
-Instructions used: 30 out of 113 (26.5%)
+Instructions used: 32 out of 113 (28.3%)
 
 "ATmega328P" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x000822   2016     10   2026   32768   6.2%
-[.dseg] 0x000100 0x000119      0     25     25    2048   1.2%
+[.cseg] 0x000000 0x00096e   2348     10   2358   32768   7.2%
+[.dseg] 0x000100 0x000120      0     32     32    2048   1.6%
 [.eseg] 0x000000 0x000000      0      0      0    1024   0.0%
 
 Assembly complete, 0 errors, 0 warnings

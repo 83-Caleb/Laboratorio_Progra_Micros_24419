@@ -40,6 +40,13 @@ al_u_minutos: .byte 1
 al_d_minutos: .byte 1
 al_u_horas: .byte 1
 al_d_horas: .byte 1
+al_horas: .byte 1
+backup_u_minutos: .byte 1
+backup_d_minutos: .byte 1
+backup_u_horas: .byte 1
+backup_d_horas: .byte 1
+backup_horas: .byte 1
+flag_alarma: .byte 1
 
 config: .byte 1 // Bandera de configuración [0xFF es config activada]
 modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es modo hora, 0x55 es config alarma]
@@ -74,7 +81,7 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 		LDI R16, HIGH(RAMEND) // LDI R16 0x08
 		OUT SPH, R16 // Ahora este tiene 0x08FF
 
-	// Configuración del oscilador general a 1MHz
+		// Configuración del oscilador general a 1MHz
 		LDI R16, (1<<CLKPCE) // Carga 0x80 (1000_0000)
 		STS CLKPR, R16 // Enable del prescaler
 		LDI R16, (1<<CLKPS2) // Set del CLKPS2 (0000_0100), que divide entre 16
@@ -116,7 +123,7 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 		STS TCCR2A, R16 // Timer2 en modo normal
 		LDI R16, (1<<CS22)|(1<<CS21) // Prescaler de 256
 		STS TCCR2B, R16
-		LDI R16, 250 // Empezar a contar desde 250
+		LDI R16, 254 // Empezar a contar desde 254
 		STS TCNT2, R16
 		LDI R16, (1<<TOIE2) // Enable del overflow interrupt
 		STS TIMSK2, R16
@@ -184,10 +191,19 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 
 		LDI R16, 0x00 // La alarma está programada por default para las 7 de la mañana
 		STS al_u_minutos, R16
-		STS	al_d_minutos, R16
+		STS al_d_minutos, R16
 		STS al_d_horas, R16
+		STS backup_u_minutos, R16
+		STS backup_d_minutos, R16
+		STS backup_u_horas, R16
+		STS backup_d_horas, R16
+		STS backup_horas, R16
+
 		LDI R16, 0x07
 		STS al_u_horas, R16
+		STS al_horas, R16
+		LDI R16, 0x00
+		STS flag_alarma, R16
 
 		// Registros de propósito general
 		CLR R16
@@ -199,6 +215,10 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 		CLR R22
 		CLR R23
 		CLR R24
+		CLR R28
+		CLR R29
+		CLR R30
+		CLR R21
 
 		// Estado incial de los displays (solo durante la carga inicial)
 		LPM R16, Z // Guardar el número actual (0 en el display)
@@ -250,9 +270,17 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 		LPM R17, Z
 		STS disp_i1, R17
 
-		SBI PORTC, PORTC0
-		CBI PORTC, PORTC1
+		LDS R16, modo
+		CPI R16, 0x55 // Si estamos configurando alarma, encendemos ambas luces
+		BREQ PC+4
+		SBI PORTC, PORTC0 // LA encendida
+		CBI PORTC, PORTC1 // LV apagada
 		RJMP Verificar_OVF
+
+		SBI PORTC, PORTC0 // LA encendida
+		SBI PORTC, PORTC1 // LV encendida
+		RJMP Verificar_OVF
+
 
 	FECHA:
 		// Unidades de dias
@@ -537,14 +565,21 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 		CPI R18, 0x00 // Si es igual a 0, el botón se está presionando y CONFIG debe ser 0xFF
 		BREQ BOTON_0
 
-		LDI R18, 0x01 // Cargamos 1 en R18
-		CLR R19 // Cargamos 0 en R19
 		LDS R16, botones // Cargamos el estado anterior de los botones
 		ANDI R16, 0x01 // Aislamos bit 0
-		CPSE R16, R18 // Si son iguales (BOTON_0 = 1), el botón estaba suelto, así que no hubo flanco de subida y se ignora la siguiente línea
-		STS config, R19 // Si no son iguales (BOTON_0 = 0), el botón estaba presionado y hubo flanco de subida, se resetea la bandera de config
-
+		CPI R16, 0x00
+		BREQ APAGAR_CONFIG // Si no esta presionado, se apaga la config
 		RJMP EXIT_ISR_PCINT0
+
+		APAGAR_CONFIG:
+			CLR R19
+			STS config, R19 // Si no son iguales (BOTON_0 = 0), el botón estaba presionado y hubo flanco de subida, se resetea la bandera de config	
+			LDS R18, modo
+			CPI R18, 0x55
+			BRNE MANTENER_MODO
+			STS modo, R19 // Si no son iguales, se regresa el modo a hora para evitar entrar en alarma
+			MANTENER_MODO:
+			RJMP EXIT_ISR_PCINT0
 
 	BOTON_0:
 		LDI R16, 0xFF
@@ -559,10 +594,10 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 
 		ACCION_B1:
 		LDS R16, modo
-		CPI R16, 0x00
-		BREQ B1_HORA // Branch si estamos en modo hora
 		CPI R16, 0xFF
 		BREQ B1_FECHA // Branch si estamos en modo fecha
+
+		RJMP B1_HORA // Branch si estamos en modo hora
 
 		B1_HORA:
 			LDS R17, disp_config // Incrementamos el valor del display seleccionado (cambia con el B4)
@@ -673,10 +708,26 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 
 		ACCION_B2:
 		LDS R16, modo
+		CPI R16, 0x55
+		BREQ B2_ALARMA // Branch si estamos en modo alarma
+
 		CPI R16, 0x00
 		BREQ B2_HORA // Branch si estamos en modo hora
 
 		RJMP B2_FECHA // Branch si estamos en modo fecha (no estamos en hora ni en alarma)
+
+		B2_ALARMA: // Guarda el valor nuevo de la alarma
+			LDS R17, u_minutos // Guardamos el valor editado
+			STS al_u_minutos, R17
+			LDS R17, d_minutos // Guardamos el valor editado
+			STS al_d_minutos, R17
+			LDS R17, u_horas // Guardamos el valor editado
+			STS al_u_horas, R17
+			LDS R17, d_horas // Guardamos el valor editado
+			STS al_d_horas, R17
+			LDS R17, cnt_horas // Guardamos el valor editado
+			STS al_horas, R17
+			RJMP EXIT_ISR_PCINT0
 
 		B2_HORA:
 			LDS R17, disp_config // Decrementamos el valor del display seleccionado (cambia con el B4)
@@ -938,22 +989,78 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 				RJMP EXIT_ISR_PCINT0
 
 	BOTON_3: // Botón de cambio de modo
+		LDS R17, config
+		CPI R17, 0xFF
+		BREQ B3_CONFIG // Si estamos en config = 0xFF, se hace esta secuencia: hora -> fecha -> alarma
+		
 		LDS R19, modo
-		CPI R19, 0x00
-		BRNE BOTON_3A
-		LDI R19, 0xFF
+		CPI R19, 0x00 // Estamos en hora
+		BREQ BOTON_3B
+		CPI R19, 0xFF // Estamos en fecha
+		BREQ BOTON_3A
+
+		LDI R19, 0x00 // Si estamos en alarma sonando, pasamos a hora y la desactivamos 
 		STS modo, R19
 		RJMP EXIT_ISR_PCINT0
 
-		BOTON_3A: // Reset de modo
+		BOTON_3A: // Pasar a hora (0)
 			LDI R19, 0x00
 			STS modo, R19
 			RJMP EXIT_ISR_PCINT0
-	
-	BOTON_4: // Botón para cambiar de display que se está configurando
+
+		BOTON_3B: // Pasar a fecha
+			LDI R19, 0xFF
+			STS modo, R19
+			RJMP EXIT_ISR_PCINT0
+
+		B3_CONFIG:
+			LDS R19, modo
+			CPI R19, 0xFF // Estamos en fecha
+			BREQ BOTON_3C 
+
+			CPI R19, 0x00 // Estamos en hora
+			BREQ BOTON_3B
+
+			LDI R19, 0x00 // Pasamos a hora si estábamos en alarma
+			STS modo, R19
+
+			// Si estábamos en alarma, guardamos los valores previos de hora
+			LDS R17, backup_u_minutos
+			STS u_minutos, R17
+			LDS R17, backup_d_minutos
+			STS d_minutos, R17
+
+			LDS R17, backup_u_horas
+			STS u_horas, R17
+			LDS R17, backup_d_horas
+			STS d_horas, R17
+			LDS R17, backup_horas
+			STS cnt_horas, R17
+			RJMP EXIT_ISR_PCINT0
+
+		BOTON_3C: // Pasar a configurar alarma
+			LDI R19, 0x55
+			STS modo, R19
+			
+			LDS R17, u_minutos // Copia de seguridad de minutos
+			STS backup_u_minutos, R17
+
+			LDS R17, d_minutos // Copia de seguridad de minutos
+			STS backup_d_minutos, R17
+
+			LDS R17, u_horas
+			STS backup_u_horas, R17
+			LDS R17, d_horas
+			STS backup_d_horas, R17
+			LDS R17, cnt_horas // Copia de seguridad de horas
+			STS backup_horas, R17
+
+			RJMP EXIT_ISR_PCINT0
+				
+	BOTON_4: // Botón para cambiar de display que se está configurando / apagar alarma
 		LDS R21, config // revisamos si estamos en CONFIG desactivada
 		CPI R21, 0x00
-		BREQ EXIT_ISR_PCINT0 // Si es así, nos vamos
+		BREQ B4_ALARMA // Si es así, nos vamos
 
 		LDS R22, disp_config // Qué display estamos configurando?
 		INC R22 // Pasamos al siguiente display
@@ -964,6 +1071,12 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 		CLR R22
 		STS disp_config, R22 // Si pasamos de 3, regresamos a 0
 		RJMP EXIT_ISR_PCINT0
+
+		B4_ALARMA:
+			LDI R16, 0x00
+			STS flag_alarma, R16
+			CBI PORTD, PORTD7
+			RJMP EXIT_ISR_PCINT0
 
 	EXIT_ISR_PCINT0:
 		STS botones, R17 // Guardamos la lectura realizada como nueva lectura de botones
@@ -988,13 +1101,23 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 		PUSH R18
 		PUSH R19
 
-		LDI R16, 250 // Empezamos a contar en 250
+		LDI R16, 254 // Empezamos a contar en 254
 		STS TCNT2, R16
 
 		IN R17, PORTC
 		ANDI R17, 0b0000_0011 // No modificamos el valor de las LEDs
 		OUT PORTC, R17 // Displays apagados por un instante
 
+		LDS R16, flag_alarma // Verificamos si hay que encender la alarma
+		CPI R16, 0xFF
+		BRNE CONTINUAR_MUX // Si hay que encenderla, seguimos
+
+		IN   R17, PORTD
+		LDI  R16, (1<<PD7)
+		EOR  R17, R16 // XOR para hacer toggle del valor del PD7
+		OUT  PORTD, R17
+
+		CONTINUAR_MUX:
 		LDS R18, disp_activo
 		CPI R18, 0x00
 		BREQ show_dispd2
@@ -1006,15 +1129,21 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 		BREQ show_dispi1
 
 	show_dispd2:
-		INC R18
-		LDS R17, disp_d2
-		OUT PORTD, R17
-		SBI PORTC, 4
+		INC R18 // Cambiar de display activo en el próximo ciclo
+		LDS R17, disp_d2 // Guardar el HEX del número que se va a mostrar (PD6-0)
+		IN R19, PORTD // Guardamos el valor actual del PORTD
+		ANDI R19, 0b1000_0000 // Aislamos el valor del PD7 (buzzer)
+		OR R17, R19 // OR de ambos registros para no modificar el estado del buzzer
+		OUT PORTD, R17 // Mostrar el valor del número
+		SBI PORTC, 4 // Habilitar el display en cuestión
 		RJMP RETURN_ISR_timer2
 	
 	show_dispd1:
 		INC R18
 		LDS R17, disp_d1
+		IN R19, PORTD
+		ANDI R19, 0b1000_0000
+		OR R17, R19
 		OUT PORTD, R17
 		SBI PORTC, 5
 		RJMP RETURN_ISR_timer2
@@ -1022,6 +1151,9 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 	show_dispi2:
 		INC R18
 		LDS R17, disp_i2
+		IN R19, PORTD
+		ANDI R19, 0b1000_0000
+		OR R17, R19
 		OUT PORTD, R17
 		SBI PORTC, 3
 		RJMP RETURN_ISR_timer2
@@ -1029,6 +1161,9 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 	show_dispi1:
 		CLR R18
 		LDS R17, disp_i1
+		IN R19, PORTD
+		ANDI R19, 0b1000_0000
+		OR R17, R19
 		OUT PORTD, R17
 		SBI PORTC, 2
 		RJMP RETURN_ISR_timer2
@@ -1063,6 +1198,27 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 		LDS R17, u_minutos // Cargamos el valor de unidades de minuto
 		INC R17 // Incrementamos el valor de unidades de minuto
 		STS u_minutos, R17 // Guardamos el nuevo valor
+
+		// Verificamos si se debe activar la alarma
+		LDS R17, u_minutos
+		LDS R18, al_u_minutos
+		CP R17, R18
+		BRNE RETURN_ISR_timer1
+
+		LDS R17, d_minutos
+		LDS R18, al_d_minutos
+		CP R17, R18
+		BRNE RETURN_ISR_timer1
+
+		LDS R17, cnt_horas
+		LDS R18, al_horas
+		CP R17, R18
+		BRNE RETURN_ISR_timer1
+
+		LDI R18, 0xFF
+		STS flag_alarma, R18 // Si llegamos a esta línea, se debe activar la alarma 
+		SBI PORTD, PORTD7
+
 		RJMP RETURN_ISR_timer1
 
 	RETURN_ISR_timer1:
