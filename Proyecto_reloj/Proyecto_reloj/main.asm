@@ -529,9 +529,6 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 		RJMP Verificar_MODO
 
 // *********************************************************************************************************************************************//
-// Subrutinas de programa
-
-// *********************************************************************************************************************************************//
 // Subrutinas de interrupción
 
 	// Interrupción para pin change en PORTB
@@ -1249,6 +1246,7 @@ modo: .byte 1 // Indicador de modo (fecha/hora) [0xFF es modo fecha, 0x00 es mod
 
 		LDS R17, cnt_LEDR
 		INC R17
+
 		STS cnt_LEDR, R17
 		CPI R17, 2
 		BRNE RETURN_ISR_timer0
