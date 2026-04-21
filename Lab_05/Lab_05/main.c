@@ -59,7 +59,7 @@ void setup(){
 	CLKPR = (1<<CLKPS0); // Set del CLKPS2 (0000_0001), que divide entre 2 para trabajar a 8Mhz
 	
 	// Configuración del ADC, empieza el 6 activado
-	ADMUX = (1 << REFS0) | (1 << ADLAR) | (1 << MUX2) | (1 << MUX1); // Configuracion de la referencia del ADC y justificado a la izquierda, porque es mas conveniente
+	ADMUX = (1 << REFS0) | (1 << ADLAR) | (1 << MUX2) | (1 << MUX1); // Configuracion de la referencia del ADC y justificado a la izquierda
 	ADCSRA |= (1 << ADEN) | (1 << ADIE); // ADC Enable e Interrupt Enable
 	ADCSRA |= (1 << ADPS2) | (1 << ADPS1); // Prescaler de 64 para el ADC
 	ADCSRA |= (1 << ADSC); // Empieza primera conversión para ADC6
